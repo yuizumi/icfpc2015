@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 
 using std::placeholders::_1;
 
@@ -34,8 +35,7 @@ Unit::Unit(const UnitSpec& spec, const Board& board)
     : members_(spec.members()),
       pivot_(spec.pivot()),
       board_(board) {
-    // TODO(yuizumi): Support the case where (min_y != 0).
-    // TODO(yuizumi): Avoid recalculation.
+    // TODO(yuizumi): Avoid recomputation.
     int min_x = members_[0].x;
     int max_x = members_[0].x;
     for (const Cell& member : members_) {
@@ -91,19 +91,19 @@ void Unit::MoveSW() {
 }
 
 bool Unit::CanRotateRight() const {
-    return TestCells(bind(&Unit::RotateCell, this, _1, +1));
-}
-
-void Unit::RotateRight() {
-    MoveCells(bind(&Unit::RotateCell, this, _1, +1));
-}
-
-bool Unit::CanRotateLeft() const {
     return TestCells(bind(&Unit::RotateCell, this, _1, -1));
 }
 
-void Unit::RotateLeft() {
+void Unit::RotateRight() {
     MoveCells(bind(&Unit::RotateCell, this, _1, -1));
+}
+
+bool Unit::CanRotateLeft() const {
+    return TestCells(bind(&Unit::RotateCell, this, _1, +1));
+}
+
+void Unit::RotateLeft() {
+    MoveCells(bind(&Unit::RotateCell, this, _1, +1));
 }
 
 bool Unit::CanInvoke(Command command) const {
@@ -147,15 +147,17 @@ void Unit::Invoke(Command command) {
 }
 
 Cell Unit::RotateCell(const Cell& cell, int direction) const {
-    int x0 = cell.x - pivot_.x;
-    int y0 = cell.y - pivot_.y;
-    double ex0 = x0 * 2.0 + static_cast<double>(cell.y % 2);
-    double ey0 = y0 * kSqrt3;
-    double ex1 = (ex0 * kSqrt3 - ey0 * static_cast<double>(direction)) / 2.0;
-    double ey1 = (ex0 * static_cast<double>(direction) + ey0 * kSqrt3) / 2.0;
-    int x1 = static_cast<int>(round(ex1)) / 2;
-    int y1 = static_cast<int>(round(ey1 / kSqrt3));
-    return Cell { x1 + pivot_.x, y1 + pivot_.y };
+    int dx = cell.x - pivot_.x;
+    int dy = cell.y - pivot_.y;
+    double ex0 = dx * 2.0 + (cell.y % 2 - pivot_.y % 2);
+    double ey0 = dy * kSqrt3;
+    double ex1 = (ex0 - ey0 * kSqrt3 * static_cast<double>(direction)) / 2.0;
+    double ey1 = (ex0 * kSqrt3 * static_cast<double>(direction) + ey0) / 2.0;
+    Cell new_cell = pivot_;
+    new_cell.y += static_cast<int>(round(ey1 / kSqrt3));
+    new_cell.x +=
+        (static_cast<int>(round(ex1)) - (new_cell.y % 2 - pivot_.y % 2)) / 2;
+    return new_cell;
 }
 
 bool Unit::TestCells(CellMover mover) const {

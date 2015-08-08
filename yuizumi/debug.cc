@@ -13,22 +13,22 @@ namespace {
 
 void PrintBoard(const Board& board, const Unit& unit) {
     for (int y = 0; y < board.height(); y++) {
-        if (y % 2 != 0) cout << ' ';
+        if (y % 2 != 0) cerr << ' ';
         for (int x = 0; x < board.width(); x++) {
             if (board.get(x, y)) {
-                cout << "x "; continue;
+                cerr << "x "; continue;
             }
             Cell cell { x, y };
             if (unit.pivot() == cell) {
-                cout << "* "; continue;
+                cerr << "* "; continue;
             }
             const vector<Cell>& members = unit.members();
             if (find(members.begin(), members.end(), cell) != members.end()) {
-                cout << "o "; continue;
+                cerr << "o "; continue;
             }
-            cout << ". ";
+            cerr << ". ";
         }
-        cout << endl;
+        cerr << endl;
     }
 }
 
