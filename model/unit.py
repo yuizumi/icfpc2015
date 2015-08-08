@@ -8,16 +8,16 @@ class Unit:
 
     def move(self, right, down):
         for member in self.members:
-            member.x += right
+            member.x += right(member)
             member.y += down
 
-        self.pivot.x += right
+        self.pivot.x += right(self.pivot)
         self.pivot.y += down
 
     def centering(self, width):
         left, right = self.left_right()
         r = width / 2 - (right - left) / 2
-        self.move(r, 0)
+        self.move(lambda c: r, 0)
 
     def left_right(self):
         l = 10000000000000000

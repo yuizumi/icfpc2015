@@ -1,6 +1,7 @@
 import enum
 class CellState(enum.IntEnum):
-    Empty = 0,
-    Fill = 1,
-    Locked = 2,
-    Active = 3
+    Empty = 0
+    Active = 1
+    Valid = 2
+    Fill = 3
+    Locked = 4

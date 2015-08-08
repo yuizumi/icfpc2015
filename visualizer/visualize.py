@@ -33,15 +33,15 @@ class Visualizer(object):
     def keyup(self, e):
         print 'up', e.keysym
         if e.keysym == Key.W.value:
-            self.board.move_unit(-1, 0, self.fill)
+            self.board.move_unit(lambda c: -1, 0, self.fill)
         if e.keysym == Key.E.value:
-            self.board.move_unit(1, 0, self.fill)
+            self.board.move_unit(lambda c: 1, 0, self.fill)
         if e.keysym == Key.SW.value:
-            right = -1 if self.board.unit.pivot.y % 2 == 0 else 0
-            self.board.move_unit(right, 1, self.fill)
+            self.board.move_unit(lambda c: -1 if c.y % 2 == 0 else 0,
+                                 1, self.fill)
         if e.keysym == Key.SE.value:
-            right = 0 if self.board.unit.pivot.y % 2 == 0 else 1
-            self.board.move_unit(right, 1, self.fill)
+            self.board.move_unit(lambda c:0 if c.y % 2 == 0 else 1,
+                                 1, self.fill)
 
 
     def initialize_cells(self):
@@ -100,7 +100,7 @@ class Visualizer(object):
 
 
 if __name__ == '__main__':
-    i = 23
+    i = 2
     with open('../problems/problem_{}.json'.format(i), 'r') as f:
         input = Input(json.load(f))
 
