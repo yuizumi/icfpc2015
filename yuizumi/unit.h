@@ -10,7 +10,7 @@
 class UnitSpec {
 public:
     UnitSpec(const std::vector<Cell>& members, const Cell& pivot);
-    UnitSpec(const UnitSpec&&) = default;
+    UnitSpec(UnitSpec&&) = default;
 
     const std::vector<Cell>& members() const { return members_; }
     const Cell& pivot() const { return pivot_; }

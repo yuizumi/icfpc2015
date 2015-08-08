@@ -6,12 +6,14 @@
 #include "basic.h"
 #include "macros.h"
 
+class Unit;
+
 class Board {
 public:
     Board(int w, int h);
 
     std::unique_ptr<Board> Clone() const;
-    void ClearRows();
+    void Lock(const Unit& unit);
 
     bool get(const Cell& cell) const {
         return get(cell.x, cell.y);
@@ -25,7 +27,7 @@ public:
     }
 
     void set(const Cell& cell, bool value) {
-        set(cell.x, cell.y);
+        set(cell.x, cell.y, value);
     }
 
     void set(int x, int y, bool value) {
@@ -44,7 +46,7 @@ public:
 private:
     std::vector<std::vector<int>> state_;
 
-    DISALLOW_ASSIGN_AND_COPY(Board);
+    DISALLOW_COPY_AND_ASSIGN(Board);
 };
 
 #endif  // BOARD_H_

@@ -8,13 +8,15 @@
 #include "macros.h"
 #include "unit.h"
 
+class GameState;
+
 class GameSpec {
 public:
     static std::unique_ptr<GameSpec> Read(std::istream& in);
-    std::unique_ptr<Game> GetNextGame();
+    std::unique_ptr<GameState> GetNextGame();
 
 private:
-    friend class Game;
+    friend class GameState;
 
     GameSpec(int id, const Board& board,
              const std::vector<UnitSpec>& units,
@@ -26,12 +28,12 @@ private:
     const std::vector<int> seeds_;
     const int source_length_;
 
-    DISALLOW_ASSIGN_AND_COPY(GameSpec);
+    DISALLOW_COPY_AND_ASSIGN(GameSpec);
 };
 
-class Game {
+class GameState {
 public:
-    Game(GameSpec& spec, int seed);
+    GameState(GameSpec& spec, int seed);
 
     const Board& board() const {
         return *board_;
@@ -41,16 +43,17 @@ public:
         return *unit_;
     }
 
-    Invoke(Command command);
+    std::unique_ptr<GameState> Clone() const;
+    void Invoke(Command command);
 
 private:
     const int id_;
     const std::unique_ptr<Board> board_;
     const std::vector<UnitSpec>& units_;
-    unique_ptr<Unit> unit_;
     int seed_, rest_;
+    std::unique_ptr<Unit> unit_;
 
-    DISALLOW_ASSIGN_AND_COPY(GameSpec);
+    DISALLOW_COPY_AND_ASSIGN(GameState);
 };
 
 #endif  // GAME_H_
