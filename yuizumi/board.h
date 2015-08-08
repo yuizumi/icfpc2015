@@ -1,72 +1,50 @@
+#ifndef BOARD_H_
+#define BOARD_H_
+
+#include <cassert>
 #include <vector>
-
-enum Command {
-    kMoveE,
-    kMoveW,
-    kMoveSE,
-    kMoveSW,
-    kRotateRight,
-    kRotateLeft,
-};
-
-enum Direction {
-    kRight = +1,
-    kLeft = -1,
-};
-
-struct Cell {
-    int x, y;
-};
+#include "basic.h"
+#include "macros.h"
 
 class Board {
 public:
-    bool get(const Cell& cell) const;
-    bool get(int x, int y) const;
+    Board(int w, int h);
 
-    void set(const Cell& cell, bool value);
-    void set(int x, int y, bool value);
+    std::unique_ptr<Board> Clone() const;
+    void ClearRows();
 
-private:
-    std::vector<std::vector<int>> states_;
-};
-
-class UnitSpec {
-    UnitSpec(const Cell& pivot, const std::vector<Cell>& cells)
-        : pivot_(pivot), cells_(cells) {
+    bool get(const Cell& cell) const {
+        return get(cell.x, cell.y);
     }
 
-    const Cell& pivot() const { return pivot_; }
-    const std::vector<Cell>& cells() const { return cells_; }
+    bool get(int x, int y) const {
+        if (x < 0 || x >= width() || y < 0 || y >= height()) {
+            return false;
+        }
+        return state_[x][y];
+    }
+
+    void set(const Cell& cell, bool value) {
+        set(cell.x, cell.y);
+    }
+
+    void set(int x, int y, bool value) {
+        assert(x >= 0 && x < width() && y >= 0 && y < height());
+        state_[x][y] = value;
+    }
+
+    int width() const {
+        return static_cast<int>(state_[0].size());
+    }
+
+    int height() const {
+        return static_cast<int>(state_.size());
+    }
 
 private:
-    const Cell pivot_;
-    const std::vector<Cell> cells_;
+    std::vector<std::vector<int>> state_;
+
+    DISALLOW_ASSIGN_AND_COPY(Board);
 };
 
-class Unit {
-public:
-    Unit(const UnitSpec& spec, Board* board);
-
-    bool CanMoveE() const;
-    void MoveE();
-    bool CanMoveW() const;
-    void MoveW();
-    bool CanMoveSE() const;
-    void MoveSE();
-    bool CanMoveSW() const;
-    void MoveSW();
-
-    bool CanRotate(Direction d) const;
-    void Rotate(Direction d);
-
-    void Lock();
-
-    void Invoke(Command command);
-
-private:
-    Cell RotateCell(const Cell& cell, Direction d) const;
-
-    Board* board_;
-    Cell pivot_;
-    std::vector<Cell> cells_;
-};
+#endif  // BOARD_H_
