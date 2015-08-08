@@ -1,4 +1,4 @@
-import Cell
+from cell import Cell
 
 class Unit:
     def __init__(self, dict):
