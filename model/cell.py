@@ -1,3 +1,5 @@
+from cell_state import CellState
+
 class Cell:
     def __init__(self, dict):
         self.x = int(dict['x'])
