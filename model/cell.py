@@ -1,3 +1,5 @@
+from cell_state import CellState
+
 class Cell:
     def __init__(self, dict):
         self.x = int(dict['x'])
@@ -7,4 +9,4 @@ class Cell:
         return "(" + str(self.x) + ", " + str(self.y) + ")"
 
     def __repr__(self):
-        return "[{}, {}]".format(self.x, self.y)
+        return "({}, {})".format(self.x, self.y)

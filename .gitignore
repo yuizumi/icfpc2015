@@ -127,3 +127,19 @@ _yardoc
 doc/
 
 
+### https://raw.github.com/github/gitignore/ecf9bac896e8e01d207838563c3c465d23cdc7a2/Global/osx.gitignore
+
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+
+
+# Thumbnails
+._*
+
+# Files that might appear on external disk
+.Spotlight-V100
+.Trashes
+
+
