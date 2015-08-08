@@ -26,6 +26,10 @@ Cell CellMoveSW(const Cell& cell) {
 }
 }  // namespace
 
+UnitSpec::UnitSpec(const vector<Cell>& members, const Cell& pivot)
+    : members_(members), pivot_(pivot) {
+}
+
 Unit::Unit(const UnitSpec& spec, const Board& board)
     : members_(spec.members()),
       pivot_(spec.pivot()),
