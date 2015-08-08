@@ -26,6 +26,8 @@ class Unit {
 public:
     Unit(const UnitSpec& spec, const Board& board);
 
+    std::unique_ptr<Unit> Clone() const;
+
     bool CanMoveE() const;
     void MoveE();
     bool CanMoveW() const;
@@ -38,6 +40,12 @@ public:
     void RotateRight();
     bool CanRotateLeft() const;
     void RotateLeft();
+
+    bool CanInvoke(Command command) const;
+    void Invoke(Command command);
+
+    const std::vector<Cell>& members() const { return members_; }
+    Cell pivot() const { return pivot_; }
 
 private:
     using CellMover = std::function<Cell(const Cell&)>;

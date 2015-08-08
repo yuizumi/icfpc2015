@@ -23,7 +23,7 @@ public:
         if (x < 0 || x >= width() || y < 0 || y >= height()) {
             return false;
         }
-        return state_[x][y];
+        return state_[y][x];
     }
 
     void set(const Cell& cell, bool value) {
@@ -32,7 +32,7 @@ public:
 
     void set(int x, int y, bool value) {
         assert(x >= 0 && x < width() && y >= 0 && y < height());
-        state_[x][y] = value;
+        state_[y][x] = value;
     }
 
     int width() const {
@@ -44,6 +44,9 @@ public:
     }
 
 private:
+    explicit Board(const std::vector<std::vector<int>> &state)
+        : state_(state) {}
+
     std::vector<std::vector<int>> state_;
 
     DISALLOW_COPY_AND_ASSIGN(Board);
