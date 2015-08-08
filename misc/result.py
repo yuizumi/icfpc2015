@@ -10,4 +10,4 @@ for line in sys.stdin.readlines():
       dict[result['solution']] = result['powerScore']
 
   for key in dict:
-    print "{0}\t{1}".format(key, dict[key])
+    print u'{0}\t{1}'.format(key, dict[key])
