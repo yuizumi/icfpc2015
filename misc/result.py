@@ -4,10 +4,12 @@ import sys
 import json
 
 for line in sys.stdin.readlines():
-  dict = {}
+  power = {}
+  score = {}
   for result in json.loads(line):
     if result['powerScore'] != 'null':
-      dict[result['solution']] = result['powerScore']
+      power[result['solution']] = result['powerScore']
+      score[result['solution']] = result['score']
 
-  for key in dict:
-    print u'{0}\t{1}'.format(key, dict[key])
+  for key in power:
+    print u'{0}\t{1}\t{2}'.format(key, power[key], score[key])
