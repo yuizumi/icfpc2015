@@ -12,7 +12,6 @@ from gui import MainFrame
 
 BasePath = os.path.dirname(os.path.abspath(__file__))
 
-
 Color = {
     CellState.Empty: "#e7e3e0",
     CellState.Fill: "#FFE677",
@@ -38,6 +37,7 @@ class Visualizer(object):
         """
         :type input:Input
         """
+        self.game = None
         self.game_sets = game_sets
         self.game_index = -1
         self.edge = None
@@ -47,6 +47,17 @@ class Visualizer(object):
         self.input = None
         self.board = None
         self.cells = None
+
+    def move_W(self):
+        self.board.move_unit(lambda c: -1, 0, self.fill)
+    def move_E(self):
+        self.board.move_unit(lambda c: 1, 0, self.fill)
+    def move_SE(self):
+        self.board.move_unit(lambda c: -1 if c.y % 2 == 0 else 0,
+                             1, self.fill)
+    def move_SW(self):
+        self.board.move_unit(lambda c: 0 if c.y % 2 == 0 else 1,
+                             1, self.fill)
 
     def keyup(self, e):
         """
@@ -62,12 +73,18 @@ class Visualizer(object):
         elif e.keysym == Key.SE.value:
             self.board.move_unit(lambda c: 0 if c.y % 2 == 0 else 1,
                                  1, self.fill)
-
         elif e.keysym == 'space':
             self.next_game()
 
-        if e.keysym == 'Escape':
+        elif e.keysym == 'Escape':
             self.gui.destroy()
+
+        elif e.keysym == 'Return':
+            self.next_step()
+
+
+        print e.keysym
+
 
     def initialize_cells(self):
         """
@@ -103,6 +120,9 @@ class Visualizer(object):
     def bind(self):
         self.gui.canvas.bind("<KeyRelease>", self.keyup)
 
+    def next_step(self):
+        pass
+
     def next_game(self):
         """
         Finish current game and start next game.
@@ -111,22 +131,21 @@ class Visualizer(object):
         if self.game_index >= len(game_sets):
             print "Your game is finished."
             return
-        game = self.game_sets[self.game_index]
-        print game
+
+        self.game = self.game_sets[self.game_index]
+        print self.game
 
         # Import game file
-        with open(os.path.join(BasePath, '../problems/problem_{}.json'.format(game.board_id)), 'r') as f:
+        with open(os.path.join(BasePath, '../problems/problem_{}.json'.format(self.game.board_id)), 'r') as f:
             self.input = Input(json.load(f))
 
-        self.board = Board(self.input, game.seed)
+        self.board = Board(self.input, self.game.seed)
         edge = min(CanvasWidth / self.input.width,
                    FrameHeight / self.input.height) - EDGE_MARGIN
 
         self.edge = edge - (edge % 2)
         self.initialize_cells()
-        self.gui.update()
         self.fill()
-        self.gui.mainloop()
 
     def visualize(self):
         self.gui = MainFrame()
@@ -145,9 +164,14 @@ if __name__ == '__main__':
     game_sets = []
 
     if args.is_std:
-        print "stdinput"
+        n = int(raw_input())
+        for i in xrange(n):
+            id, seed = map(int, raw_input())
+            operations = raw_input()
+            game_sets.append(GameSet(id, seed, operations))
+
     else:
-        game_sets.append(GameSet(args.board_id, args.seed, []))
+        game_sets.append(GameSet(args.board_id, args.seed, ""))
 
     visualizer = Visualizer(game_sets)
     visualizer.visualize()
