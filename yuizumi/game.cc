@@ -45,13 +45,18 @@ void GameState::Swap(GameState* other) {
     swap(unit_, other->unit_);
 }
 
-bool GameState::CanInvoke(Command command) const {
-    if (!unit_->CanInvoke(command)) {
+bool GameState::CanMove(Command command) const {
+    return unit().CanInvoke(command);
+}
+
+bool GameState::IsValid(Command command) const {
+    if (gameover_) {
         return false;
+    } else {
+        unique_ptr<Unit> clone(unit_->Clone());
+        clone->Invoke(command);
+        return !banned_.count(clone->Hash());
     }
-    unique_ptr<Unit> clone(unit_->Clone());
-    clone->Invoke(command);
-    return !banned_.count(clone->Hash());
 }
 
 void GameState::Invoke(Command command) {
