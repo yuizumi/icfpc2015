@@ -14,6 +14,7 @@ public:
               uint32_t seed, int length);
 
     std::unique_ptr<GameState> Clone() const;
+    void Swap(GameState* other);
     void Invoke(Command command);
 
     const Board& board() const {
@@ -43,7 +44,7 @@ private:
     void UpdateUnit();
 
     const std::vector<UnitSpec>& units_;
-    const std::unique_ptr<Board> board_;
+    std::unique_ptr<Board> board_;
     uint32_t seed_;
     int rest_;
     bool gameover_;

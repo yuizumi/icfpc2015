@@ -1,5 +1,6 @@
 #include "game.h"
 
+#include <algorithm>
 #include <cstdio>
 #include <vector>
 
@@ -31,6 +32,16 @@ GameState::GameState(const GameState* state)
 
 unique_ptr<GameState> GameState::Clone() const {
     return unique_ptr<GameState>(new GameState(this));
+}
+
+void GameState::Swap(GameState* other) {
+    assert(&units_ == &other->units_);
+    swap(board_, other->board_);
+    swap(seed_, other->seed_);
+    swap(rest_, other->rest_);
+    swap(gameover_, other->gameover_);
+    swap(commands_, other->commands_);
+    swap(unit_, other->unit_);
 }
 
 void GameState::Invoke(Command command) {
