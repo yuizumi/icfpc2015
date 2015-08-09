@@ -19,3 +19,4 @@ class Key(enum.Enum):
     SW = "v"
     ROTATE_RIGHT = "h"
     ROTATE_LEFT = "g"
+

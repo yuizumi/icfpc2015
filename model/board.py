@@ -33,14 +33,10 @@ class Board(object):
 
     def is_valid_rotate(self, direction):
         for cell in self.unit.members:
-            print cell
             new_cell = self.unit.rotate_cell(cell, direction)
             if not (0 <= new_cell.x < self.width and 0 <= new_cell.y < self.height):
-                print "Wall"
                 return False
-            print new_cell.x, new_cell.y, self.states[new_cell.y][new_cell.x]
             if self.states[new_cell.y][new_cell.x] > CellState.Valid:
-                print "Filled"
                 return False
         return True
 
@@ -52,8 +48,6 @@ class Board(object):
 
         self.unit = copy.deepcopy(self.units[self.rands.next()])
         self.unit.centering(self.width)
-        print self.score
-
 
     def move_unit(self, right, down, callback):
         if self.is_valid_move(right, down):
@@ -85,7 +79,6 @@ class Board(object):
             else:
                 deleted_lines.append(y)
 
-        print deleted_lines
         deleted_lines.sort()
         for cell in self.locked + self.filled:
             if cell.y in deleted_lines:
@@ -118,3 +111,21 @@ class Board(object):
             yield ((r >> 16) & 0x7FFF) % len(self.units)
             r = (r * 1103515245 + 12345) % (1 << 32)
 
+
+    def move_W(self, callback):
+        self.move_unit(lambda c: -1, 0, callback)
+
+    def move_E(self, callback):
+        self.move_unit(lambda c: 1, 0, callback)
+
+    def move_SW(self, callback):
+        self.move_unit(lambda c: -1 if c.y % 2 == 0 else 0, 1, callback)
+
+    def move_SE(self, callback):
+        self.move_unit(lambda c: 0 if c.y % 2 == 0 else 1, 1, callback)
+
+    def rotate_R(self, callback):
+        self.rotate_unit(-1, callback)
+
+    def rotate_L(self, callback):
+        self.rotate_unit(+1, callback)

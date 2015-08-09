@@ -21,6 +21,7 @@ Color = {
 
 BgColor = "#57B196"
 
+Operators = ['new', Key.E, Key.W, Key.SE, Key.SW, Key.ROTATE_RIGHT, Key.ROTATE_LEFT]
 
 class GameSet():
     def __init__(self, board_id, seed, operations):
@@ -31,6 +32,9 @@ class GameSet():
     def __repr__(self):
         return "Board: {} Seed: {}\nOperations: {}".format(self.board_id, self.seed, self.operations)
 
+class KeyEvent():
+    def __init__(self, keysym):
+        self.keysym = keysym
 
 class Visualizer(object):
     def __init__(self, game_sets):
@@ -39,7 +43,8 @@ class Visualizer(object):
         """
         self.game = None
         self.game_sets = game_sets
-        self.game_index = -1
+        self.game_index = 0
+        self.operation_index = 0
         self.edge = None
         self.gui = None
         self.binary = None
@@ -47,48 +52,33 @@ class Visualizer(object):
         self.input = None
         self.board = None
         self.cells = None
+        self.operations = []
 
-    def move_W(self):
-        self.board.move_unit(lambda c: -1, 0, self.fill)
-    def move_E(self):
-        self.board.move_unit(lambda c: 1, 0, self.fill)
-    def move_SE(self):
-        self.board.move_unit(lambda c: -1 if c.y % 2 == 0 else 0,
-                             1, self.fill)
-    def move_SW(self):
-        self.board.move_unit(lambda c: 0 if c.y % 2 == 0 else 1,
-                             1, self.fill)
 
     def keyup(self, e):
         """
         Key setting.
         """
         if e.keysym == Key.W.value:
-            self.board.move_unit(lambda c: -1, 0, self.fill)
+            self.board.move_W(self.fill)
         elif e.keysym == Key.E.value:
-            self.board.move_unit(lambda c: 1, 0, self.fill)
+            self.board.move_E(self.fill)
         elif e.keysym == Key.SW.value:
-            self.board.move_unit(lambda c: -1 if c.y % 2 == 0 else 0,
-                                 1, self.fill)
+            self.board.move_SW(self.fill)
         elif e.keysym == Key.SE.value:
-            self.board.move_unit(lambda c: 0 if c.y % 2 == 0 else 1,
-                                 1, self.fill)
+            self.board.move_SE(self.fill)
         elif e.keysym == Key.ROTATE_RIGHT.value:
-            self.board.rotate_unit(+1, self.fill)
+            self.board.rotate_R(self.fill)
         elif e.keysym == Key.ROTATE_LEFT.value:
-            self.board.rotate_unit(-1, self.fill)
-
+            self.board.rotate_L(self.fill)
         elif e.keysym == 'space':
             self.next_game()
-
         elif e.keysym == 'Escape':
             self.gui.destroy()
-
         elif e.keysym == 'Return':
             self.next_step()
-
-
-        print e.keysym
+        # else:
+        #     print e.keysym
 
 
     def initialize_cells(self):
@@ -126,19 +116,25 @@ class Visualizer(object):
         self.gui.canvas.bind("<KeyRelease>", self.keyup)
 
     def next_step(self):
-        pass
+        if self.operation_index >= len(self.game.operations):
+            print "Finish this game."
+            return
+        o = int(self.game.operations[self.operation_index])
+        if 0 < o <= len(Operators):
+            self.keyup(KeyEvent(Operators[o].value))
+        self.operation_index += 1
 
     def next_game(self):
         """
         Finish current game and start next game.
         """
-        self.game_index += 1
+        self.operation_index = 0
         if self.game_index >= len(game_sets):
             print "Your game is finished."
             return
 
         self.game = self.game_sets[self.game_index]
-        print self.game
+        print "Start new game:", self.game
 
         # Import game file
         with open(os.path.join(BasePath, '../problems/problem_{}.json'.format(self.game.board_id)), 'r') as f:
@@ -151,6 +147,7 @@ class Visualizer(object):
         self.edge = edge - (edge % 2)
         self.initialize_cells()
         self.fill()
+        self.game_index += 1
 
     def visualize(self):
         self.gui = MainFrame()
@@ -171,7 +168,7 @@ if __name__ == '__main__':
     if args.is_std:
         n = int(raw_input())
         for i in xrange(n):
-            id, seed = map(int, raw_input())
+            id, seed = map(int, raw_input().split())
             operations = raw_input()
             game_sets.append(GameSet(id, seed, operations))
 
