@@ -48,7 +48,6 @@ int main() {
         Solve(&state);
 
         cout << id << " " << seed << endl;
-        cout << state.commands().size() << endl;
         for (Command command : state.commands()) cout << command;
         cout << endl; cout.flush();
     }
