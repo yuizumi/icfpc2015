@@ -27,6 +27,7 @@ public:
     Unit(const UnitSpec& spec, const Board& board);
 
     std::unique_ptr<Unit> Clone() const;
+    uint32_t Hash() const;
 
     bool CanMoveE() const;
     void MoveE();

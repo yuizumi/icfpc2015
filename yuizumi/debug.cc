@@ -1,5 +1,7 @@
 #include "debug.h"
 
+#ifndef NDEBUG
+
 #include <algorithm>
 #include <iostream>
 #include <map>
@@ -67,3 +69,4 @@ void Print(const GameState& state) {
 
 }  // namespace debug
 
+#endif  // !defined(NDEBUG)

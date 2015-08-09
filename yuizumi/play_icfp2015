@@ -1,0 +1,25 @@
+#!/bin/bash
+
+declare -r AI=./fake_ai
+declare -a phrases
+
+while getopts :f:t:m:c:p opt ; do
+    case "${opt}" in
+        f)
+            filename="${OPTARG}"
+            ;;
+        p)
+            phrases+=("${OPTARG}")
+            ;;
+        *)
+            ;;
+    esac
+done
+
+if [[ ! -f "${filename}" ]] ; then
+    echo "$0: File not found -- ${filename}" 2>&1
+    exit 1
+fi
+
+python json2cp.py < "${filename}" | "${AI}" | ./translate "${phrases[@]}" \
+    | python out2json.py

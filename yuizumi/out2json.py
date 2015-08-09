@@ -1,11 +1,11 @@
 import json
 import sys
 
-lines = sys.stdin.readlines()
+n = int(sys.stdin.readline())
 output = []
-for i in xrange(0, len(lines), 2):
-    id, seed = lines[i].strip().split()
-    solution = lines[i + 1].strip()
+for i in xrange(n):
+    id, seed = sys.stdin.readline().strip().split()
+    solution = sys.stdin.readline()
     output.append(
         {'problemId': int(id), 'seed': int(seed), 'solution': solution})
 print json.dumps(output)
