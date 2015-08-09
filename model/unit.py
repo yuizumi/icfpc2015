@@ -34,7 +34,7 @@ class Unit:
 
     def centering(self, width):
         left, right = self.left_right()
-        r = width / 2 - (right - left) / 2
+        r = (width - (right - left + 1)) / 2 - left
         self.move(lambda c: r, 0)
 
     def left_right(self):
