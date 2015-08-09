@@ -51,7 +51,7 @@ bool GameState::CanInvoke(Command command) const {
     }
     unique_ptr<Unit> clone(unit_->Clone());
     clone->Invoke(command);
-    return banned_.count(unit_->Hash());
+    return !banned_.count(clone->Hash());
 }
 
 void GameState::Invoke(Command command) {
