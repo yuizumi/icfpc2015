@@ -3,7 +3,7 @@ import java.util.*;
 
 class Main {
     private static final boolean DEBUG = false;
-    private static final int RUNNUM = 5;
+    private static final int RUNNUM = 7;
 
     public static void main(String... args) throws Exception {
         {
@@ -56,9 +56,8 @@ class Main {
                     unitSeq[i] = initial.appear(units[prng.nextInt() % units.length]);
                 final String solution = dfs(new Board(initial), unitSeq[0], unitSeq, 1, new HashSet<>(),
                         new boolean[phrases.length], -1, 0);
-                if (solution.contains(phrases[0]))
-                    solutions.add(String.format("{\"seed\": %d, \"solution\": \"%s\", \"tag\": \"java%d\", \"problemId\": %d}",
-                            seed, solution, RUNNUM, id));
+                solutions.add(String.format("{\"seed\": %d, \"solution\": \"%s\", \"tag\": \"java%d\", \"problemId\": %d}",
+                        seed, solution, RUNNUM, id));
                 // for yizumi interface
 //                {
 //                    final StringBuilder sb = new StringBuilder();
@@ -82,9 +81,12 @@ class Main {
     }
 
     static String[] phrases = {
-            "ia! ia!",
-            "r'lyeh",
-            "yuggoth",
+            "Ei!",
+            "Ia! Ia!",
+            "R'lyeh",
+            "Yuggoth",
+            "Tsathoggua",
+            "Necronomicon",
             "Cthulhu fhtagn!",
             "Ph'nglui mglw'nafh Cthulhu R'lyeh wgah'nagl fhtagn.",
             "In his house at R'lyeh dead Cthulhu waits dreaming.",
@@ -132,6 +134,7 @@ class Main {
                         System.out.println("depth (a) = " + idx);
                         b.printWithAUnit(u);
                     }
+                    visited.remove(u);
                     return "" + (pidx < 0 ? c.c : phrases[pidx].charAt(cidx));
                 }
                 final Board newBoard = new Board(b).lock(u).remove();
@@ -140,6 +143,7 @@ class Main {
                         System.out.println("depth (b) = " + idx);
                         b.printWithAUnit(u);
                     }
+                    visited.remove(u);
                     return "" + (pidx < 0 ? c.c : phrases[pidx].charAt(cidx));
                 }
                 final String s = dfs(newBoard, unitSeq[idx], unitSeq, idx + 1, new HashSet<>(), used,
@@ -149,20 +153,23 @@ class Main {
                         System.out.println("depth (c) = " + idx + " (" + s.length() + ")");
                         b.printWithAUnit(u);
                     }
+                    visited.remove(u);
                     return (pidx < 0 ? c.c : phrases[pidx].charAt(cidx)) + s;
                 }
                 continue;
             }
             final String s = dfs(b, n, unitSeq, idx, visited, used,
                     flag ? -1 : pidx, flag ? 0 : cidx + 1);
-                if (s != null) {
+            if (s != null) {
                 if (DEBUG) {
                     System.out.println("depth (d) = " + idx + " (" + s.length() + ")");
                     b.printWithAUnit(u);
                 }
+                visited.remove(u);
                 return (pidx < 0 ? c.c : phrases[pidx].charAt(cidx)) + s;
             }
         }
+        visited.remove(u);
         return null;
     }
 
