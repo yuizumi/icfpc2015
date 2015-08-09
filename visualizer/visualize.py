@@ -37,7 +37,7 @@ class KeyEvent():
         self.keysym = keysym
 
 class Visualizer(object):
-    def __init__(self, game_sets, auto=False):
+    def __init__(self, game_sets, auto=False, is_keyword=False):
         """
         :type input:Input
         """
@@ -53,6 +53,7 @@ class Visualizer(object):
         self.board = None
         self.cells = None
         self.auto = auto
+        self.is_keyword = is_keyword
         self.operations = []
 
 
@@ -79,9 +80,7 @@ class Visualizer(object):
         elif e.keysym == 'Return':
             if self.auto != -1 and self.operation_index < len(self.game.operations):
                 self.gui.after(i * self.auto, self.keyup, e)
-                self.next_step()
-            else:
-                self.next_step()
+            self.next_step()
 
         # else:
         #     print e.keysym
@@ -125,9 +124,12 @@ class Visualizer(object):
         if self.operation_index >= len(self.game.operations):
             print "Finish this game."
             return
-        o = int(self.game.operations[self.operation_index])
-        if 0 < o <= len(Operators):
-            self.keyup(KeyEvent(Operators[o].value))
+        o = self.game.operations[self.operation_index]
+        if self.is_keyword:
+            e = CharaToOperation[o.lower()].value
+        else:
+            e = Operators[int(o)].value
+        self.keyup(KeyEvent(e))
         self.operation_index += 1
 
     def next_game(self):
@@ -168,6 +170,7 @@ if __name__ == '__main__':
     parser.add_argument('--id', dest='board_id', default=0, type=int, help='Board id.')
     parser.add_argument('--seed', dest='seed', default=0, type=int, help='Seed index.')
     parser.add_argument('--auto', dest='auto', default=-1, type=int, help='Auto play mode.')
+    parser.add_argument('--keyword', dest='is_keyword', action='store_true', help='')
 
     args = parser.parse_args()
     game_sets = []
@@ -182,5 +185,5 @@ if __name__ == '__main__':
     else:
         game_sets.append(GameSet(args.board_id, args.seed, ""))
 
-    visualizer = Visualizer(game_sets, args.auto)
+    visualizer = Visualizer(game_sets, args.auto, args.is_keyword)
     visualizer.visualize()
