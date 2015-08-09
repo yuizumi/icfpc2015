@@ -27,7 +27,7 @@ GameState::GameState(const GameState* state)
       rest_(state->rest_),
       gameover_(state->gameover_),
       commands_(state->commands_),
-      unit_(state->unit_->Clone()),
+      unit_(state->unit_->Clone(*board_)),
       banned_(state->banned_) {
 }
 
@@ -53,7 +53,7 @@ bool GameState::IsValid(Command command) const {
     if (gameover_) {
         return false;
     } else {
-        unique_ptr<Unit> clone(unit_->Clone());
+        unique_ptr<Unit> clone(unit_->Clone(*board_));
         clone->Invoke(command);
         return !banned_.count(clone->Hash());
     }

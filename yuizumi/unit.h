@@ -26,7 +26,7 @@ class Unit {
 public:
     Unit(const UnitSpec& spec, const Board& board);
 
-    std::unique_ptr<Unit> Clone() const;
+    std::unique_ptr<Unit> Clone(const Board& board) const;
     uint32_t Hash() const;
 
     bool CanMoveE() const;
@@ -50,6 +50,8 @@ public:
 
 private:
     using CellMover = std::function<Cell(const Cell&)>;
+
+    Unit(const Unit& unit, const Board& board);
 
     std::vector<Cell> members_;
     Cell pivot_;
