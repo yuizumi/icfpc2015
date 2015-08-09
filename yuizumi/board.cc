@@ -1,23 +1,34 @@
 #include "board.h"
 
+#include <algorithm>
+#include "unit.h"
+
 using namespace std;
 
-Board::Board(int w, int h) : w_(w), h_(h), states_(h, vector<int>(w, 0)) {
+Board::Board(int w, int h) : state_(h, vector<int>(w)) {
 }
 
-void Board::ClearRows() {
-    int y1 = 0;
+std::unique_ptr<Board> Board::Clone() const {
+    return std::unique_ptr<Board>(new Board(state_));
+}
 
-    for (int y0 = 0; y0 < h_; y0++) {
-        if (count(states_[y0].begin(), states_[y0].end(), 0) > 0) {
+void Board::Lock(const Unit& unit) {
+    for (const Cell& cell : unit.members()) {
+        set(cell, true);
+    }
+
+    int y1 = height();
+
+    for (int y0 = height() - 1; y0 >= 0; y0--) {
+        if (count(state_[y0].begin(), state_[y0].end(), 0) == 0) {
             continue;
         }
-        if (y0 > y1) {
-            copy(states_[y1].begin(), states_[y1].end(), states_[y0].begin());
+        --y1;
+        if (y0 != y1) {
+            copy(state_[y1].begin(), state_[y1].end(), state_[y0].begin());
         }
-        ++y1;
     }
-    for (; y1 < h_; y1++) {
-        fill(states_[y1].begin(), states_[y1].end(), 0);
+    for (y1--; y1 >= 0; y1--) {
+        fill(state_[y1].begin(), state_[y1].end(), 0);
     }
 }
