@@ -1,4 +1,6 @@
+import bisect
 import copy
+
 from model import Input, CellState, Unit
 
 
@@ -7,6 +9,7 @@ class Board(object):
         """
         :type self.unit:Unit
         """
+        self.score = 0
         self.width = input.width
         self.height = input.height
         self.states = [[CellState.Empty for _ in xrange(input.width)] for _ in xrange(input.height)]
@@ -18,35 +21,28 @@ class Board(object):
         self.rands = self.get_rands(0)
         self.unit = copy.deepcopy(self.units[self.rands.next()])
         self.unit.centering(self.width)
-
         self.update_states()
 
     def is_valid_move(self, right, down):
         for cell in self.unit.members:
-            print cell
             if not (0 <= cell.x + right(cell) < self.width and 0 <= cell.y + down < self.height):
-                print "Wall"
                 return False
-            print cell.x + right(cell), cell.y + down, self.states[cell.y + down][cell.x + right(cell)]
             if self.states[cell.y + down][cell.x + right(cell)] > CellState.Valid:
-                print "Filled"
                 return False
         return True
 
-    def print_states(self):
-        for y in xrange(self.height):
-            for x in xrange(self.width):
-                print self.states[y][x],
-            print
-
     def lock_unit(self):
         self.locked += self.unit.members
-        print self.locked
+        self.update_states()
+        deleted = self.delete_line()
+        self.score += deleted * 100 + len(self.unit.members)
+
         self.unit = copy.deepcopy(self.units[self.rands.next()])
         self.unit.centering(self.width)
+        print self.score
+
 
     def move_unit(self, right, down, callback):
-        self.print_states()
         if self.is_valid_move(right, down):
             self.unit.move(right, down)
         else:
@@ -58,6 +54,27 @@ class Board(object):
         for y in xrange(self.height):
             for x in xrange(self.width):
                 self.states[y][x] = CellState.Empty
+
+    def delete_line(self):
+        deleted_lines = []
+        for y in range(self.height)[::-1]:
+            for x in xrange(self.width):
+                if self.states[y][x] < CellState.LockOrFill:
+                    break
+            else:
+                deleted_lines.append(y)
+
+        print deleted_lines
+        deleted_lines.sort()
+        for cell in self.locked + self.filled:
+            if cell.y in deleted_lines:
+                cell.x = -1
+
+            d = len(deleted_lines) - bisect.bisect_left(deleted_lines, cell.y)
+            cell.y += d
+        self.locked = [cell for cell in self.locked if cell.x > -1]
+        self.filled = [cell for cell in self.filled if cell.x > -1]
+        return len(deleted_lines)
 
     def update_states(self):
         self.initialize_states()

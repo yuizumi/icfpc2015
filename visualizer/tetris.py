@@ -1,5 +1,11 @@
 import enum
 
+FrameHeight = 600
+FrameMargin = 10
+
+CanvasWidth = 600
+OptionWidth = 300
+FrameWidth = CanvasWidth + OptionWidth
 EDGE = 20
 EDGE_MARGIN = 1
 MARGIN = 20
