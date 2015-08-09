@@ -39,8 +39,8 @@ void PrintCommands(const vector<Command>& commands) {
         {kMoveW, "W"},
         {kMoveSE, "SE"},
         {kMoveSW, "SW"},
-        {kRotateRight, "Rcc"},
-        {kRotateLeft, "Rc"},
+        {kRotateRight, "rotr"},
+        {kRotateLeft, "rotl"},
     };
 
     for (Command command : commands) {

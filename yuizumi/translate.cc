@@ -22,8 +22,8 @@ string Build(const vector<Command>& commands) {
         {kMoveW, '!'},
         {kMoveSE, 'n'},
         {kMoveSW, 'i'},
-        {kRotateRight, 'x'},  // Counter-clockwise.
-        {kRotateLeft, 'v'},   // Clockwise.
+        {kRotateRight, 'v'},  // Clockwise.
+        {kRotateLeft, 'x'},   // Counter-clockwise.
     };
 
     string seq(commands.size(), '\0');
