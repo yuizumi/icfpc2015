@@ -6,7 +6,7 @@ import json
 
 def toBin(i):
   if i == None:
-    return "None"
+    return "Unknown"
   i = int(i)
   result = []
   temp = abs(i)
