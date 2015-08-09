@@ -14,6 +14,6 @@ dict = {
 }
 
 for line in sys.stdin.readlines():
-  chars = list(line)
+  chars = list(line.lower())
   for char in chars:
     print dict[char]
