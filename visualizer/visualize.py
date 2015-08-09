@@ -37,7 +37,7 @@ class KeyEvent():
         self.keysym = keysym
 
 class Visualizer(object):
-    def __init__(self, game_sets):
+    def __init__(self, game_sets, auto=False):
         """
         :type input:Input
         """
@@ -52,6 +52,7 @@ class Visualizer(object):
         self.input = None
         self.board = None
         self.cells = None
+        self.auto = auto
         self.operations = []
 
 
@@ -76,7 +77,12 @@ class Visualizer(object):
         elif e.keysym == 'Escape':
             self.gui.destroy()
         elif e.keysym == 'Return':
-            self.next_step()
+            if self.auto != -1 and self.operation_index < len(self.game.operations):
+                self.gui.after(i * self.auto, self.keyup, e)
+                self.next_step()
+            else:
+                self.next_step()
+
         # else:
         #     print e.keysym
 
@@ -161,6 +167,7 @@ if __name__ == '__main__':
     parser.add_argument('--std', dest='is_std', action='store_true', help='Receive std input.')
     parser.add_argument('--id', dest='board_id', default=0, type=int, help='Board id.')
     parser.add_argument('--seed', dest='seed', default=0, type=int, help='Seed index.')
+    parser.add_argument('--auto', dest='auto', default=-1, type=int, help='Auto play mode.')
 
     args = parser.parse_args()
     game_sets = []
@@ -175,5 +182,5 @@ if __name__ == '__main__':
     else:
         game_sets.append(GameSet(args.board_id, args.seed, ""))
 
-    visualizer = Visualizer(game_sets)
+    visualizer = Visualizer(game_sets, args.auto)
     visualizer.visualize()
