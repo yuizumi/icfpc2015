@@ -25,7 +25,7 @@ public:
     }
 
     bool done() const {
-        return unit_.get() != nullptr;
+        return unit_.get() == nullptr;
     }
 
     int rest() const {

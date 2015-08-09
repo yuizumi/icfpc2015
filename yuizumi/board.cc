@@ -20,7 +20,7 @@ void Board::Lock(const Unit& unit) {
     int y1 = height();
 
     for (int y0 = height() - 1; y0 >= 0; y0--) {
-        if (count(state_[y0].begin(), state_[y0].end(), 0) != 0) {
+        if (count(state_[y0].begin(), state_[y0].end(), 0) == 0) {
             continue;
         }
         --y1;
@@ -28,7 +28,7 @@ void Board::Lock(const Unit& unit) {
             copy(state_[y1].begin(), state_[y1].end(), state_[y0].begin());
         }
     }
-    for (; y1 >= 0; y1--) {
+    for (y1--; y1 >= 0; y1--) {
         fill(state_[y1].begin(), state_[y1].end(), 0);
     }
 }

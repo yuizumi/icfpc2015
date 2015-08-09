@@ -40,12 +40,20 @@ void GameState::Invoke(Command command) {
 }
 
 void GameState::SetNextUnit() {
+    unit_.reset();
+
     if (rest_ == 0) {
-        unit_.reset();
-    } else {
-        seed_ = seed_ * 1103515245 + 12345;
-        int value = (seed_ >> 16) & 0x7FFF;
-        --rest_;
-        unit_.reset(new Unit(units_[value % units_.size()], *board_));
+        return;
     }
+
+    seed_ = seed_ * 1103515245 + 12345;
+    int value = (seed_ >> 16) & 0x7FFF;
+    --rest_;
+    unique_ptr<Unit> unit(new Unit(units_[value % units_.size()], *board_));
+    for (const Cell& cell : unit->members()) {
+        if (board_->get(cell)) {
+            return;
+        }
+    }
+    unit_.reset(unit.release());
 }

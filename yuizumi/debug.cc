@@ -51,11 +51,16 @@ void PrintCommands(const vector<Command>& commands) {
 
 }  // namespace
 
+// TODO(yuizumi): Connect to visualizer.
 void Print(const GameState& state) {
     cerr << "========" << endl;
     PrintCommands(state.commands());
-    cerr << "Units left: " << state.rest() << endl;
-    PrintBoard(state.board(), state.unit());
+    if (state.done()) {
+        cerr << "Done" << endl;
+    } else {
+        cerr << "Units left: " << state.rest() << endl;
+        PrintBoard(state.board(), state.unit());
+    }
 }
 
 }  // namespace debug

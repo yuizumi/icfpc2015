@@ -3,6 +3,10 @@
 
 void Solve(GameState* state) {
     debug::Print(*state);
+    state->Invoke(kMoveSW);
+    debug::Print(*state);
+    state->Invoke(kMoveSE);
+    debug::Print(*state);
     state->Invoke(kRotateRight);
     debug::Print(*state);
     state->Invoke(kMoveE);
@@ -11,6 +15,12 @@ void Solve(GameState* state) {
     debug::Print(*state);
     state->Invoke(kMoveW);
     debug::Print(*state);
-    state->Invoke(kRotateRight);
+    state->Invoke(kRotateLeft);
+    debug::Print(*state);
+    state->Invoke(kMoveSW);
+    debug::Print(*state);
+    state->Invoke(kMoveSW);
+    debug::Print(*state);
+    state->Invoke(kMoveW);
     debug::Print(*state);
 }
