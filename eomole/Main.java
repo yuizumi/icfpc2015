@@ -4,7 +4,7 @@ import java.util.*;
 
 class Main {
     private static final boolean DEBUG = false;
-    private static final int RUNNUM = 3;
+    private static final int RUNNUM = 4;
 
     public static void main(String... args) throws Exception {
         {
@@ -57,8 +57,16 @@ class Main {
                     unitSeq[i] = initial.appear(units[prng.nextInt() % units.length]);
                 final String solution = dfs(new Board(initial), unitSeq[0], unitSeq, 1, new HashSet<>(),
                         new boolean[phrases.length], -1, 0);
-                solutions.add(String.format("{\"seed\": %d, \"solution\": \"%s\", \"tag\": \"java%d\", \"problemId\": %d}",
-                        seed, solution, RUNNUM, id));
+                if (solution.contains(phrases[0]))
+                    solutions.add(String.format("{\"seed\": %d, \"solution\": \"%s\", \"tag\": \"java%d\", \"problemId\": %d}",
+                            seed, solution, RUNNUM, id));
+                // for yizumi interface
+//                {
+//                    final StringBuilder sb = new StringBuilder();
+//                    for(final char c : solution.toCharArray())
+//                        sb.append(Decoder.decode(c).number);
+//                    solutions.add(sb.toString());
+//                }
                 if (DEBUG)
                     System.out.println(solution);
             }
@@ -75,10 +83,11 @@ class Main {
     }
 
     static String[] phrases = {
-            "ei!",
             "ia! ia!",
             "r'lyeh",
-            "yuggoth"
+            "yuggoth",
+            "Cthulhu fhtagn!",
+            "Ph'nglui mglw'nafh Cthulhu R'lyeh wgah'nagl fhtagn."
     };
 
     static String dfs(Board b, Unit u, Unit[] unitSeq, int idx, HashSet<Unit> visited, boolean[] used, int pidx, int cidx) {
@@ -95,7 +104,7 @@ class Main {
                 if (!used[i]) {
                     used[i] = true;
                     final String s = dfs(b, u, unitSeq, idx, visited, used, i, 0);
-                    if (s != null) {
+                    if (s != null && s.startsWith(phrases[i])) {
                         if (DEBUG)
                             System.out.println("try " + phrases[i] + ":\t" + s);
                         return s;
@@ -146,7 +155,7 @@ class Main {
             }
             final String s = dfs(b, n, unitSeq, idx, visited, used,
                     flag ? -1 : pidx, flag ? 0 : cidx + 1);
-            if (s != null) {
+                if (s != null) {
                 if (DEBUG) {
                     System.out.println("depth (d) = " + idx + " (" + s.length() + ")");
                     b.printWithAUnit(u);
@@ -159,12 +168,14 @@ class Main {
 
 
     static enum Command {
-        MoveSW('4'), MoveSE('5'), MoveW('3'), MoveE('2'), TurnCounterClockwise('x'), TurnClockwise('1'),;
+        MoveSW('4', 4), MoveSE('5', 3), MoveW('3', 2), MoveE('2', 1), TurnCounterClockwise('x', 5), TurnClockwise('1', 6),;
 
         final char c;
+        final int number;
 
-        Command(char c) {
+        Command(char c, int number) {
             this.c = c;
+            this.number = number;
         }
     }
 
@@ -447,6 +458,7 @@ class Main {
         }
 
         static Command decode(char c) {
+            c = Character.toLowerCase(c);
             if (!map.containsKey(c))
                 throw new RuntimeException("" + c);
             return map.get(c);
