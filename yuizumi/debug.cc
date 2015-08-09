@@ -55,10 +55,12 @@ void PrintCommands(const vector<Command>& commands) {
 void Print(const GameState& state) {
     cerr << "========" << endl;
     PrintCommands(state.commands());
-    if (state.done()) {
-        cerr << "Done" << endl;
-    } else {
-        cerr << "Units left: " << state.rest() << endl;
+    cerr << "Units left: " << state.rest();
+    if (state.gameover()) {
+        cerr << " (game over)";
+    }
+    cerr << endl;
+    if (state.rest() > 0) {
         PrintBoard(state.board(), state.unit());
     }
 }
