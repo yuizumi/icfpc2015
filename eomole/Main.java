@@ -1,10 +1,9 @@
-
 import java.io.FileInputStream;
 import java.util.*;
 
 class Main {
     private static final boolean DEBUG = false;
-    private static final int RUNNUM = 4;
+    private static final int RUNNUM = 5;
 
     public static void main(String... args) throws Exception {
         {
@@ -87,7 +86,8 @@ class Main {
             "r'lyeh",
             "yuggoth",
             "Cthulhu fhtagn!",
-            "Ph'nglui mglw'nafh Cthulhu R'lyeh wgah'nagl fhtagn."
+            "Ph'nglui mglw'nafh Cthulhu R'lyeh wgah'nagl fhtagn.",
+            "In his house at R'lyeh dead Cthulhu waits dreaming.",
     };
 
     static String dfs(Board b, Unit u, Unit[] unitSeq, int idx, HashSet<Unit> visited, boolean[] used, int pidx, int cidx) {
