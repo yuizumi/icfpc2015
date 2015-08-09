@@ -21,4 +21,7 @@ inline bool operator!=(const Cell& a, const Cell& b) {
     return !(a.x == b.x);
 }
 
+Command CharToCommand(char c);
+char CommandToChar(Command c);
+
 #endif  // BASIC_H_

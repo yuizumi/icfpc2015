@@ -3,7 +3,7 @@ HDRS=$(wildcard *.h)
 
 BINDIR=.
 
-OBJS=board.o debug.o game.o input.o unit.o
+OBJS=basic.o board.o debug.o game.o input.o unit.o
 TARGETS=$(BINDIR)/fake_ai $(BINDIR)/translate $(BINDIR)/validate
 
 # Debug mode.

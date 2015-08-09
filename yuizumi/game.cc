@@ -59,11 +59,12 @@ bool GameState::IsValid(Command command) const {
     }
 }
 
-void GameState::Invoke(Command command) {
+void GameState::Invoke(char command) {
     assert(!gameover_);
 
-    if (unit_->CanInvoke(command)) {
-        unit_->Invoke(command);
+    Command command_enum = CharToCommand(command);
+    if (unit_->CanInvoke(command_enum)) {
+        unit_->Invoke(command_enum);
         const auto result = banned_.insert(unit_->Hash());
         assert(result.second);
     } else {
