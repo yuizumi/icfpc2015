@@ -1,6 +1,7 @@
 #ifndef GAME_H_
 #define GAME_H_
 
+#include <unordered_set>
 #include <vector>
 #include "basic.h"
 #include "board.h"
@@ -16,9 +17,7 @@ public:
     std::unique_ptr<GameState> Clone() const;
     void Swap(GameState* other);
 
-    bool CanInvoke(Command command) const {
-        return unit().CanInvoke(command);
-    }
+    bool CanInvoke(Command command) const;
     void Invoke(Command command);
 
     const Board& board() const {
@@ -54,6 +53,7 @@ private:
     bool gameover_;
     std::vector<Command> commands_;
     std::unique_ptr<Unit> unit_;
+    std::unordered_set<uint32_t> banned_;
 
     DISALLOW_COPY_AND_ASSIGN(GameState);
 };

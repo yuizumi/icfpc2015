@@ -58,6 +58,16 @@ unique_ptr<Unit> Unit::Clone() const {
     return unique_ptr<Unit>(new Unit(*this));
 }
 
+uint32_t Unit::Hash() const {
+    const uint32_t x_multi = 1722715777;
+    const uint32_t y_multi =  208049593;
+    uint32_t hash = 0;
+    for (const Cell& member : members_) {
+        hash ^= member.x * x_multi + member.y * y_multi;
+    }
+    return hash;  // Pivot not considered.
+}
+
 bool Unit::CanMoveE() const {
     return TestCells(CellMoveE);
 }

@@ -27,7 +27,8 @@ GameState::GameState(const GameState* state)
       rest_(state->rest_),
       gameover_(state->gameover_),
       commands_(state->commands_),
-      unit_(state->unit_->Clone()) {
+      unit_(state->unit_->Clone()),
+      banned_(state->banned_) {
 }
 
 unique_ptr<GameState> GameState::Clone() const {
@@ -44,11 +45,22 @@ void GameState::Swap(GameState* other) {
     swap(unit_, other->unit_);
 }
 
+bool GameState::CanInvoke(Command command) const {
+    if (!unit_->CanInvoke(command)) {
+        return false;
+    }
+    unique_ptr<Unit> clone(unit_->Clone());
+    clone->Invoke(command);
+    return banned_.count(unit_->Hash());
+}
+
 void GameState::Invoke(Command command) {
     assert(!gameover_);
 
     if (unit_->CanInvoke(command)) {
         unit_->Invoke(command);
+        const auto result = banned_.insert(unit_->Hash());
+        assert(result.second);
     } else {
         board_->Lock(*unit_);
         UpdateUnit();
@@ -65,5 +77,7 @@ void GameState::UpdateUnit() {
         int value = (seed_ >> 16) & 0x7FFF;
         unit_.reset(new Unit(units_[value % units_.size()], *board_));
         gameover_ = HasConflicts(*unit_, *board_);
+        banned_.clear();
+        banned_.insert(unit_->Hash());
     }
 }
