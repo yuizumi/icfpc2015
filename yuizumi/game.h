@@ -1,6 +1,7 @@
 #ifndef GAME_H_
 #define GAME_H_
 
+#include <string>
 #include <unordered_set>
 #include <vector>
 #include "basic.h"
@@ -19,7 +20,19 @@ public:
 
     bool CanMove(Command command) const;
     bool IsValid(Command command) const;
-    void Invoke(Command command);
+    void Invoke(char command);
+
+    bool CanMove(char command) const {
+        return CanMove(CharToCommand(command));
+    }
+
+    bool IsValid(char command) const {
+        return IsValid(CharToCommand(command));
+    }
+
+    void Invoke(Command command) {
+        Invoke(CommandToChar(command));
+    }
 
     const Board& board() const {
         return *board_;
@@ -38,7 +51,7 @@ public:
         return rest_;
     }
 
-    const std::vector<Command>& commands() const {
+    const std::string& commands() const {
         return commands_;
     }
 
@@ -52,7 +65,7 @@ private:
     uint32_t seed_;
     int rest_;
     bool gameover_;
-    std::vector<Command> commands_;
+    std::string commands_;
     std::unique_ptr<Unit> unit_;
     std::unordered_set<uint32_t> banned_;
 
