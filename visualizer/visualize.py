@@ -2,77 +2,178 @@ import os, sys
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+import argparse
 import json
+import time
 import Tkinter as Tk
 from tetris import *
-from model import Input, CellState
+from model import Input, CellState, Board
+from gui import MainFrame
+
+BasePath = os.path.dirname(os.path.abspath(__file__))
 
 Color = {
     CellState.Empty: "#e7e3e0",
     CellState.Fill: "#FFE677",
-    CellState.Locked: "#bbbbbb"
+    CellState.Active: "#44C2B3",
+    CellState.Locked: "#bbbbbb",
 }
 
+BgColor = "#57B196"
+
+Operators = ['new', Key.E, Key.W, Key.SE, Key.SW, Key.ROTATE_RIGHT, Key.ROTATE_LEFT]
+
+class GameSet():
+    def __init__(self, board_id, seed, operations):
+        self.board_id = board_id
+        self.seed = seed
+        self.operations = operations
+
+    def __repr__(self):
+        return "Board: {} Seed: {}\nOperations: {}".format(self.board_id, self.seed, self.operations)
+
+class KeyEvent():
+    def __init__(self, keysym):
+        self.keysym = keysym
+
 class Visualizer(object):
-    def __init__(self, input):
+    def __init__(self, game_sets):
         """
         :type input:Input
         """
-        self.input = input
-        self.width = input.width * (EDGE + EDGE_MARGIN) + MARGIN
-        self.height = input.height * (EDGE + EDGE_MARGIN) + MARGIN
-        self.cells = [["" for _ in xrange(input.width)] for _ in xrange(input.height)]
+        self.game = None
+        self.game_sets = game_sets
+        self.game_index = 0
+        self.operation_index = 0
+        self.edge = None
+        self.gui = None
+        self.binary = None
+        self.score_label = None
+        self.input = None
+        self.board = None
+        self.cells = None
+        self.operations = []
 
 
-    def initial_state(self, canvas):
+    def keyup(self, e):
         """
-        :type canvas:Tk.Canvas
+        Key setting.
+        """
+        if e.keysym == Key.W.value:
+            self.board.move_W(self.fill)
+        elif e.keysym == Key.E.value:
+            self.board.move_E(self.fill)
+        elif e.keysym == Key.SW.value:
+            self.board.move_SW(self.fill)
+        elif e.keysym == Key.SE.value:
+            self.board.move_SE(self.fill)
+        elif e.keysym == Key.ROTATE_RIGHT.value:
+            self.board.rotate_R(self.fill)
+        elif e.keysym == Key.ROTATE_LEFT.value:
+            self.board.rotate_L(self.fill)
+        elif e.keysym == 'space':
+            self.next_game()
+        elif e.keysym == 'Escape':
+            self.gui.destroy()
+        elif e.keysym == 'Return':
+            self.next_step()
+        # else:
+        #     print e.keysym
+
+
+    def initialize_cells(self):
+        """
+        Initialize all cells. This method should be called when starting new game.
+        """
+        self.gui.canvas.delete("all")
+        self.cells = [["" for _ in xrange(self.input.width)] for _ in xrange(self.input.height)]
+        for y in xrange(self.input.height):
+            for x in xrange(self.input.width):
+                left_margin = 0 if y % 2 == 0 else (self.edge / 2)
+                x_pos = x * (self.edge + EDGE_MARGIN) + left_margin
+                y_pos = y * (self.edge + EDGE_MARGIN)
+                self.cells[y][x] = self.gui.canvas.create_rectangle(x_pos,
+                                                                    y_pos,
+                                                                    x_pos + self.edge,
+                                                                    y_pos + self.edge,
+                                                                    fill=Color[CellState.Empty],
+                                                                    outline="#FFFFFF")
+
+    def fill(self):
+        """
+        Redraw cells.
         """
         for y in xrange(self.input.height):
             for x in xrange(self.input.width):
-                left_margin = 0 if y % 2 == 0 else (MARGIN / 2)
-                x_pos = x * (EDGE + EDGE_MARGIN) + left_margin
-                y_pos = y * (EDGE + EDGE_MARGIN)
-                self.cells[y][x] = canvas.create_rectangle(x_pos,
-                                                           y_pos,
-                                                           x_pos + EDGE,
-                                                           y_pos + EDGE,
-                                                           fill=Color[CellState.Empty],
-                                                           outline="#FFFFFF")
+                self.gui.canvas.itemconfig(self.cells[y][x], fill=Color[self.board.states[y][x]], outline="#FFFFFF")
 
-    def fill(self, canvas):
+        pivot = self.board.unit.pivot
+        self.gui.canvas.itemconfig(self.cells[pivot.y][pivot.x], outline="#000000")
+        self.gui.option_area.score_label.configure(text=self.board.score)
+
+
+    def bind(self):
+        self.gui.canvas.bind("<KeyRelease>", self.keyup)
+
+    def next_step(self):
+        if self.operation_index >= len(self.game.operations):
+            print "Finish this game."
+            return
+        o = int(self.game.operations[self.operation_index])
+        if 0 < o <= len(Operators):
+            self.keyup(KeyEvent(Operators[o].value))
+        self.operation_index += 1
+
+    def next_game(self):
         """
-        :type canvas:Tk.Canvas
+        Finish current game and start next game.
         """
-        states = [[CellState.Empty for _ in xrange(input.width)] for _ in xrange(input.height)]
-        for cell in self.input.filled:
-            states[cell.y][cell.x] = CellState.Fill
-        print self.input.filled
+        self.operation_index = 0
+        if self.game_index >= len(game_sets):
+            print "Your game is finished."
+            return
 
-        for y in xrange(self.input.height):
-            for x in xrange(self.input.width):
-                canvas.itemconfig(self.cells[y][x], fill=Color[states[y][x]])
+        self.game = self.game_sets[self.game_index]
+        print "Start new game:", self.game
 
+        # Import game file
+        with open(os.path.join(BasePath, '../problems/problem_{}.json'.format(self.game.board_id)), 'r') as f:
+            self.input = Input(json.load(f))
 
+        self.board = Board(self.input, self.game.seed)
+        edge = min(CanvasWidth / self.input.width,
+                   FrameHeight / self.input.height) - EDGE_MARGIN
 
+        self.edge = edge - (edge % 2)
+        self.initialize_cells()
+        self.fill()
+        self.game_index += 1
 
-    def visualize(self, i):
-        print self.input
-        root = Tk.Tk()
-        root.title("visualize{}".format(i))
-        root.geometry("{}x{}".format(self.width, self.height))
-        canvas = Tk.Canvas(root, width=self.width, height=self.height)
-        self.initial_state(canvas)
-        self.fill(canvas)
-        canvas.pack()
-        root.mainloop()
+    def visualize(self):
+        self.gui = MainFrame()
+        self.bind()
+        self.next_game()
+        self.gui.mainloop()
 
 
 if __name__ == '__main__':
-    # for i in xrange(23):
-    i = 23
-    with open('../problems/problem_{}.json'.format(i), 'r') as f:
-        input = Input(json.load(f))
+    parser = argparse.ArgumentParser(description='Visualizer')
+    parser.add_argument('--std', dest='is_std', action='store_true', help='Receive std input.')
+    parser.add_argument('--id', dest='board_id', default=0, type=int, help='Board id.')
+    parser.add_argument('--seed', dest='seed', default=0, type=int, help='Seed index.')
 
-    visualizer = Visualizer(input)
-    visualizer.visualize(i)
+    args = parser.parse_args()
+    game_sets = []
+
+    if args.is_std:
+        n = int(raw_input())
+        for i in xrange(n):
+            id, seed = map(int, raw_input().split())
+            operations = raw_input()
+            game_sets.append(GameSet(id, seed, operations))
+
+    else:
+        game_sets.append(GameSet(args.board_id, args.seed, ""))
+
+    visualizer = Visualizer(game_sets)
+    visualizer.visualize()

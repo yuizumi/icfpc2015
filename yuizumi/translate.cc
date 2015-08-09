@@ -22,8 +22,8 @@ string Build(const vector<Command>& commands) {
         {kMoveW, '!'},
         {kMoveSE, 'n'},
         {kMoveSW, 'i'},
-        {kRotateRight, 'x'},  // Counter-clockwise.
-        {kRotateLeft, 'v'},   // Clockwise.
+        {kRotateRight, 'v'},  // Clockwise.
+        {kRotateLeft, 'x'},   // Counter-clockwise.
     };
 
     string seq(commands.size(), '\0');
@@ -36,9 +36,13 @@ string Build(const vector<Command>& commands) {
 int main() {
     ios_base::sync_with_stdio(false);
     cin.tie(nullptr);
-    int id, seed;
-    string seq;
-    while (cin >> id >> seed >> seq) {
+    int size;
+    cin >> size;
+    cout << size << endl;
+    for (int i = 0; i < size; i++) {
+        int id, seed;
+        string seq;
+        cin >> id >> seed >> seq;
         cout << id << " " << seed << endl << Build(Parse(seq)) << endl;
     }
     return 0;
