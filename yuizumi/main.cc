@@ -40,7 +40,8 @@ int main() {
 
     int length; cin >> length;
     int num_seeds; cin >> num_seeds;
-    
+
+    cout << num_seeds << endl;
     for (int i = 0; i < num_seeds; i++) {
         int seed; cin >> seed;
 
