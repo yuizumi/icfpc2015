@@ -78,8 +78,8 @@ void GameState::UpdateUnit() {
         unit_.reset();
         gameover_ = true;
     } else {
-        seed_ = seed_ * 1103515245 + 12345;
         int value = (seed_ >> 16) & 0x7FFF;
+        seed_ = seed_ * 1103515245 + 12345;
         unit_.reset(new Unit(units_[value % units_.size()], *board_));
         gameover_ = HasConflicts(*unit_, *board_);
         banned_.clear();

@@ -3,6 +3,7 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include "debug.h"
 #include "game.h"
 #include "input.h"
 
@@ -25,8 +26,8 @@ int main() {
 
         assert(spec.id == out_id);
 
-        GameState state(spec.units, spec.board->Clone(),
-                        out_seed, spec.length);
+        GameState state(spec.units, spec.board->Clone(), out_seed,
+                        spec.length);
         for (size_t i = 0; i < out_seq.length(); i++) {
             Command command = static_cast<Command>(out_seq[i] - '0');
             if (!state.IsValid(command)) {
@@ -34,6 +35,7 @@ int main() {
                 return 1;
             }
             state.Invoke(command);
+            debug::Print(state);
         }
     }
     cout << "Valid." << endl;
