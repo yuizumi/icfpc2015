@@ -49,13 +49,14 @@ Unit::Unit(const UnitSpec& spec, const Board& board)
     pivot_.x += x_move;
 }
 
-Unit::Unit(const Unit& unit) : members_(unit.members_),
-                               pivot_(unit.pivot_),
-                               board_(unit.board_) {
+Unit::Unit(const Unit& unit, const Board& board)
+    : members_(unit.members_),
+      pivot_(unit.pivot_),
+      board_(board) {
 }
 
-unique_ptr<Unit> Unit::Clone() const {
-    return unique_ptr<Unit>(new Unit(*this));
+unique_ptr<Unit> Unit::Clone(const Board& board) const {
+    return unique_ptr<Unit>(new Unit(*this, board));
 }
 
 uint32_t Unit::Hash() const {
