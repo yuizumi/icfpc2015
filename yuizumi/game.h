@@ -17,7 +17,8 @@ public:
     std::unique_ptr<GameState> Clone() const;
     void Swap(GameState* other);
 
-    bool CanInvoke(Command command) const;
+    bool CanMove(Command command) const;
+    bool IsValid(Command command) const;
     void Invoke(Command command);
 
     const Board& board() const {

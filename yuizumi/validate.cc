@@ -27,13 +27,16 @@ int main() {
 
         GameState state(spec.units, spec.board->Clone(),
                         out_seed, spec.length);
-        for (char ch : out_seq) {
-            cout << ch;
-            Command command = static_cast<Command>(ch - '0');
+        for (size_t i = 0; i < out_seq.length(); i++) {
+            Command command = static_cast<Command>(out_seq[i] - '0');
+            if (!state.IsValid(command)) {
+                cout << "Invalid at " << i << "." << endl;
+                return 1;
+            }
             state.Invoke(command);
         }
     }
-    cout << " -- no problem found." << endl;
+    cout << "Valid." << endl;
 
     return 0;
 }
