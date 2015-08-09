@@ -15,15 +15,17 @@
 using namespace std;
 
 const vector<string> power_phrases = {
-  "Ia! Ia!",
-  "Ei!",
-  "Yuggoth",
-  "p",
-  "b",
+  "ia! ia!",
+  "ei!",
+  "yuggoth",
+  "ph'nglui mglw'nafh cthulhu r'lyeh wgah'nagl fhtagn.",
+  "cthulhu fhtagn!"
   "a",
   "l",
   "d",
-  "k"
+  "k",
+  "p",
+  "b"
 };
 
 void GreedySolver::Solve(const GameState &gameState, GameState *result) {
@@ -54,35 +56,19 @@ void GreedySolver::Solve(const GameState &gameState, GameState *result) {
 
 bool GreedySolver::CastPhrase(const string &phrase, GameState *state) {
   cerr << "Casting phrase " << phrase << endl;
-  bool failed = false;
+  const Unit &unit = state->unit();
   for (auto c : phrase) {
-    const Unit &unit = state->unit();
     auto command = kCharToCommand.find(c)->second;
-    // TODO(tayama): Move this logic to GameState.
-    
-    switch(command) {
-    case kNone:
-      break;
-    case kMoveE:
-      if (unit.CanMoveE()) state->Invoke(kMoveE); else failed = true;
-      break;
-    case kMoveW:
-      if (unit.CanMoveW()) state->Invoke(kMoveW); else failed = true;
-      break;
-    case kMoveSE:
-      if (unit.CanMoveSE()) state->Invoke(kMoveSE); else failed = true;
-      break;
-    case kMoveSW:
-      if (unit.CanMoveSW()) state->Invoke(kMoveSW); else failed = true;
-      break;
-    case kRotateRight:
-      if (unit.CanRotateRight()) state->Invoke(kRotateRight); else failed = true;
-      break;
-    case kRotateLeft:
-      if (unit.CanRotateLeft()) state->Invoke(kRotateLeft); else failed = true;
-      break;
+    cerr << "Can move " << command << " as " << c << endl;
+    bool can_move = state->CanMove(command);
+    cerr << "Can move " << command << " as " << c << ": done" << endl;
+    if (can_move) {
+      cerr << "Invoking " << command << " as " << c << ": done" << endl;
+      state->Invoke(command);
+      cerr << "Invoking " << command << " as " << c << ": done" << endl;
+    } else {
+      return false;
     }
-    if (failed) break;
   }
-  return !failed;
+  return true;
 }
