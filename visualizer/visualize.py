@@ -62,6 +62,10 @@ class Visualizer(object):
         elif e.keysym == Key.SE.value:
             self.board.move_unit(lambda c: 0 if c.y % 2 == 0 else 1,
                                  1, self.fill)
+        if e.keysym == Key.ROTATE_RIGHT.value:
+            self.board.rotate_unit(+1, self.fill)
+        if e.keysym == Key.ROTATE_LEFT.value:
+            self.board.rotate_unit(-1, self.fill)
 
         elif e.keysym == 'space':
             self.next_game()
