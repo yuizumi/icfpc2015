@@ -14,6 +14,7 @@ public:
               uint32_t seed, int length);
 
     std::unique_ptr<GameState> Clone() const;
+    void Swap(GameState* other);
     void Invoke(Command command);
 
     const Board& board() const {
@@ -21,11 +22,12 @@ public:
     }
 
     const Unit& unit() const {
+        assert(unit_);
         return *unit_;
     }
 
-    bool done() const {
-        return unit_.get() == nullptr;
+    bool gameover() const {
+        return gameover_;
     }
 
     int rest() const {
@@ -37,21 +39,17 @@ public:
     }
 
 private:
-    GameState(const std::vector<UnitSpec>& units,
-              std::unique_ptr<Board> board,
-              uint32_t seed, int length,
-              std::unique_ptr<Unit> unit,
-              const std::vector<Command>& commands);
+    GameState(const GameState* state);
 
-    void SetNextUnit();
+    void UpdateUnit();
 
     const std::vector<UnitSpec>& units_;
-    const std::unique_ptr<Board> board_;
+    std::unique_ptr<Board> board_;
     uint32_t seed_;
     int rest_;
-
-    std::unique_ptr<Unit> unit_;
+    bool gameover_;
     std::vector<Command> commands_;
+    std::unique_ptr<Unit> unit_;
 
     DISALLOW_COPY_AND_ASSIGN(GameState);
 };
