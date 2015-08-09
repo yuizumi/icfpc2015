@@ -17,3 +17,5 @@ class Key(enum.Enum):
     E = "j"
     SE = "n"
     SW = "v"
+    ROTATE_RIGHT = "h"
+    ROTATE_LEFT = "g"

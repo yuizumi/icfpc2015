@@ -31,6 +31,19 @@ class Board(object):
                 return False
         return True
 
+    def is_valid_rotate(self, direction):
+        for cell in self.unit.members:
+            print cell
+            new_cell = self.unit.rotate_cell(cell, direction)
+            if not (0 <= new_cell.x < self.width and 0 <= new_cell.y < self.height):
+                print "Wall"
+                return False
+            print new_cell.x, new_cell.y, self.states[new_cell.y][new_cell.x]
+            if self.states[new_cell.y][new_cell.x] > CellState.Valid:
+                print "Filled"
+                return False
+        return True
+
     def lock_unit(self):
         self.locked += self.unit.members
         self.update_states()
@@ -45,6 +58,14 @@ class Board(object):
     def move_unit(self, right, down, callback):
         if self.is_valid_move(right, down):
             self.unit.move(right, down)
+        else:
+            self.lock_unit()
+        self.update_states()
+        callback()
+
+    def rotate_unit(self, direction, callback):
+        if self.is_valid_rotate(direction):
+            self.unit.rotate(direction)
         else:
             self.lock_unit()
         self.update_states()
