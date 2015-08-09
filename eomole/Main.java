@@ -1,9 +1,11 @@
-package icfpc2015;
 
 import java.io.FileInputStream;
 import java.util.*;
 
 class Main {
+    private static final boolean DEBUG = false;
+    private static final int RUNNUM = 3;
+
     public static void main(String... args) throws Exception {
         {
             boolean f = false;
@@ -42,35 +44,26 @@ class Main {
             for (int i = 0; i < sourceSeeds.length; i++)
                 sourceSeeds[i] = sc.nextInt();
 
-//            initial.print();
-//            for (final Unit unit : units)
-//                initial.printWithAUnit(initial.appear(unit));
+            if (DEBUG) {
+                initial.print();
+                for (final Unit unit : units)
+                    initial.printWithAUnit(initial.appear(unit));
+            }
 
             for (final int seed : sourceSeeds) {
                 final PRNG prng = new PRNG(seed);
                 final Unit[] unitSeq = new Unit[sourceLength];
                 for (int i = 0; i < sourceLength; i++)
                     unitSeq[i] = initial.appear(units[prng.nextInt() % units.length]);
-                final String solution = dfs(new Board(initial), unitSeq[0], unitSeq, 1, new HashSet<>());
-                solutions.add(String.format("{\"seed\": %d, \"solution\": \"%s\", \"problemId\": %d}",
-                        seed, solution, id));
-//                System.err.println(solution);
+                final String solution = dfs(new Board(initial), unitSeq[0], unitSeq, 1, new HashSet<>(),
+                        new boolean[phrases.length], -1, 0);
+                solutions.add(String.format("{\"seed\": %d, \"solution\": \"%s\", \"tag\": \"java%d\", \"problemId\": %d}",
+                        seed, solution, RUNNUM, id));
+                if (DEBUG)
+                    System.out.println(solution);
             }
-
-//        for (Command c : Command.values()) {
-//            System.out.println(c);
-//            Unit u = initial.appear(units[3]);
-//            for (int i = 0; i < 3; i++) {
-//                initial.printWithAUnit(u);
-//                u = initial.doCommand(c, u);
-//                if (initial.isLocked(u)) {
-//                    System.out.println("locked");
-//                    break;
-//                }
-//            }
-//        }
-
         }
+
         final StringBuilder sb = new StringBuilder();
         for (final String s : solutions) {
             if (sb.length() > 0)
@@ -81,46 +74,84 @@ class Main {
 
     }
 
+    static String[] phrases = {
+            "ei!",
+            "ia! ia!",
+            "r'lyeh",
+            "yuggoth"
+    };
 
-    static String dfs(Board b, Unit u, Unit[] unitSeq, int idx, HashSet<Unit> visited) {
+    static String dfs(Board b, Unit u, Unit[] unitSeq, int idx, HashSet<Unit> visited, boolean[] used, int pidx, int cidx) {
 
-//        System.out.println("depth = " + idx);
-//        System.out.println(u);
-//        b.printWithAUnit(u);
+        if (DEBUG) {
+            System.out.println("depth = " + idx);
+            System.out.println(u);
+            b.printWithAUnit(u);
+        }
 
+        // try new phrase
+        if (pidx < 0)
+            for (int i = 0; i < phrases.length; i++)
+                if (!used[i]) {
+                    used[i] = true;
+                    final String s = dfs(b, u, unitSeq, idx, visited, used, i, 0);
+                    if (s != null) {
+                        if (DEBUG)
+                            System.out.println("try " + phrases[i] + ":\t" + s);
+                        return s;
+                    }
+                    used[i] = false;
+                }
+
+        final Command[] commands = pidx < 0 ?
+                Command.values() :
+                new Command[]{Decoder.decode(phrases[pidx].charAt(cidx))};
+
+        // TODO: unsafe
         visited.add(u);
-        for (Command c : Command.values()) {
+
+        final boolean flag = pidx < 0 || cidx >= phrases[pidx].length() - 1;
+
+
+        for (Command c : commands) {
             final Unit n = b.doCommand(c, u);
             if (visited.contains(n))
                 continue;
             if (b.isLocked(n)) {
                 if (idx >= unitSeq.length) {
-//                    System.out.println("depth (a) = " + idx);
-//                    b.printWithAUnit(u);
-                    return "" + c.c;
+                    if (DEBUG) {
+                        System.out.println("depth (a) = " + idx);
+                        b.printWithAUnit(u);
+                    }
+                    return "" + (pidx < 0 ? c.c : phrases[pidx].charAt(cidx));
                 }
                 final Board newBoard = new Board(b).lock(u).remove();
                 if (newBoard.isLocked(unitSeq[idx])) {
-//                    System.out.println("depth (b) = " + idx);
-//                    b.printWithAUnit(u);
-                    return "" + c.c;
+                    if (DEBUG) {
+                        System.out.println("depth (b) = " + idx);
+                        b.printWithAUnit(u);
+                    }
+                    return "" + (pidx < 0 ? c.c : phrases[pidx].charAt(cidx));
                 }
-                final String s = dfs(newBoard, unitSeq[idx], unitSeq, idx + 1, new HashSet<>());
-                if (!s.isEmpty()) {
-//                    System.out.println("fixed");
-//                    newBoard.printWithAUnit(unitSeq[idx]);
-
-//                    System.out.println("depth (c) = " + idx);
-//                    b.printWithAUnit(u);
-                    return c.c + s;
+                final String s = dfs(newBoard, unitSeq[idx], unitSeq, idx + 1, new HashSet<>(), used,
+                        flag ? -1 : pidx, flag ? 0 : cidx + 1);
+                if (s != null) {
+                    if (DEBUG) {
+                        System.out.println("depth (c) = " + idx + " (" + s.length() + ")");
+                        b.printWithAUnit(u);
+                    }
+                    return (pidx < 0 ? c.c : phrases[pidx].charAt(cidx)) + s;
                 }
                 continue;
             }
-            final String s = dfs(b, n, unitSeq, idx, visited);
-            if (!s.isEmpty()) {
-//                System.out.println("depth (d) = " + idx);
-//                b.printWithAUnit(u);
-                return c.c + s;
+            final String s = dfs(b, n, unitSeq, idx, visited, used,
+                    flag ? -1 : pidx, flag ? 0 : cidx + 1);
+            if (s != null) {
+                if (DEBUG) {
+                    System.out.println("depth (d) = " + idx + " (" + s.length() + ")");
+                    b.printWithAUnit(u);
+                }
+                return (pidx < 0 ? c.c : phrases[pidx].charAt(cidx)) + s;
             }
         }
         return null;
@@ -128,7 +159,7 @@ class Main {
 
 
     static enum Command {
-        MoveSW('4'), MoveSE('5'), MoveW('3'), MoveE('2'), TurnCounterClockwise('x'), TurnClockwise('1'), ;
+        MoveSW('4'), MoveSE('5'), MoveW('3'), MoveE('2'), TurnCounterClockwise('x'), TurnClockwise('1'),;
 
         final char c;
 
@@ -267,15 +298,12 @@ class Main {
 
         public Unit appear(Unit next) {
             int minx = Integer.MAX_VALUE, maxx = Integer.MIN_VALUE;
-            int miny = Integer.MAX_VALUE, maxy = Integer.MIN_VALUE;
             for (final Cell c : next.members) {
                 minx = Math.min(minx, c.x + c.y / 2);
                 maxx = Math.max(maxx, c.x + c.y / 2);
-                miny = Math.min(miny, c.y);
-                maxy = Math.max(maxy, c.y);
             }
-            final int dy = -miny;
-            final int dx = (minx + w - maxx) / 2 - minx;
+            final int dy = 0; // unsafe
+            final int dx = (w - maxx + minx - 1) / 2 - minx;
             final Cell newPivot = new Cell(next.pivot.x + dx, next.pivot.y + dy);
             final Cell[] newMembers = new Cell[next.members.length];
             for (int i = 0; i < newMembers.length; i++)
@@ -311,6 +339,7 @@ class Main {
 
         public Unit(Cell[] members, Cell pivot) {
             this.members = members;
+            Arrays.sort(members);
             this.pivot = pivot;
         }
 
@@ -324,7 +353,7 @@ class Main {
         }
     }
 
-    static class Cell {
+    static class Cell implements Comparable<Cell> {
         final int x, y;
 
         public Cell(int x, int y) {
@@ -378,6 +407,11 @@ class Main {
             sb.append('}');
             return sb.toString();
         }
+
+        @Override
+        public int compareTo(Cell o) {
+            return x == o.x ? y - o.y : x - o.x;
+        }
     }
 
     static class PRNG {
@@ -391,6 +425,31 @@ class Main {
             int ret = (stat >> 16) & 0x7FFF;
             stat = stat * 1103515245 + 12345;
             return ret;
+        }
+    }
+
+    static class Decoder {
+        static Map<Character, Command> map = new HashMap<>();
+
+        static {
+            for (final char c : "p'!.03".toCharArray())
+                map.put(c, Command.MoveW);
+            for (final char c : "bcefy2".toCharArray())
+                map.put(c, Command.MoveE);
+            for (final char c : "aghij4".toCharArray())
+                map.put(c, Command.MoveSW);
+            for (final char c : "lmno 5".toCharArray())
+                map.put(c, Command.MoveSE);
+            for (final char c : "dqrvz1".toCharArray())
+                map.put(c, Command.TurnClockwise);
+            for (final char c : "kstuwx".toCharArray())
+                map.put(c, Command.TurnCounterClockwise);
+        }
+
+        static Command decode(char c) {
+            if (!map.containsKey(c))
+                throw new RuntimeException("" + c);
+            return map.get(c);
         }
     }
 }
