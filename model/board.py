@@ -14,6 +14,7 @@ class Board(object):
         self.height = input.height
         self.states = [[CellState.Empty for _ in xrange(input.width)] for _ in xrange(input.height)]
         self.locked = []
+        self.locus = set()
         self.filled = input.filled
         self.units = input.units
         self.sourceSeeds = input.sourceSeeds
@@ -48,6 +49,7 @@ class Board(object):
 
         self.unit = copy.deepcopy(self.units[self.rands.next()])
         self.unit.centering(self.width)
+        self.locus = set()
 
     def move_unit(self, right, down, callback):
         if self.is_valid_move(right, down):

@@ -36,6 +36,7 @@ class OptionArea(Tk.Frame):
                        width=300,
                        heigh=300)
         self.score_label = self.add_score_label()
+        self.turn_label = self.add_turn_label()
         self.stage_selector = self.add_stage_list()
         self.binary_box = self.add_binary_box()
 
@@ -43,6 +44,15 @@ class OptionArea(Tk.Frame):
         label = Tk.Label(self, text=0)
         label.pack()
         return label
+
+    def add_turn_label(self):
+        e = Tk.Entry(self)
+        e.pack()
+        return e
+
+    def update_turn(self, num):
+        self.turn_label.delete(0, Tk.END)
+        self.turn_label.insert(0, str(num))
 
     def add_stage_list(self):
         stages = range(24)

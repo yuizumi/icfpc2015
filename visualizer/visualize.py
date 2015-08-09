@@ -22,6 +22,14 @@ Color = {
 BgColor = "#57B196"
 
 Operators = ['new', Key.E, Key.W, Key.SE, Key.SW, Key.ROTATE_RIGHT, Key.ROTATE_LEFT]
+OperatorToInt = {
+    Key.E: 1,
+    Key.W: 2,
+    Key.SE: 3,
+    Key.SW: 4,
+    Key.ROTATE_RIGHT: 5,
+    Key.ROTATE_LEFT: 6
+}
 
 class GameSet():
     def __init__(self, board_id, seed, operations):
@@ -55,23 +63,34 @@ class Visualizer(object):
         self.auto = auto
         self.is_keyword = is_keyword
         self.operations = []
+        self.turn_num = 0
 
+    def update_board(self, key):
+        self.operations.append(OperatorToInt[key])
+        self.turn_num += 1
+        self.gui.option_area.update_turn(self.turn_num)
 
     def keyup(self, e):
         """
         Key setting.
         """
         if e.keysym == Key.W.value:
+            self.update_board(Key.W)
             self.board.move_W(self.fill)
         elif e.keysym == Key.E.value:
+            self.update_board(Key.E)
             self.board.move_E(self.fill)
         elif e.keysym == Key.SW.value:
+            self.update_board(Key.SW)
             self.board.move_SW(self.fill)
         elif e.keysym == Key.SE.value:
+            self.update_board(Key.SE)
             self.board.move_SE(self.fill)
         elif e.keysym == Key.ROTATE_RIGHT.value:
+            self.update_board(Key.ROTATE_RIGHT)
             self.board.rotate_R(self.fill)
         elif e.keysym == Key.ROTATE_LEFT.value:
+            self.update_board(Key.ROTATE_LEFT)
             self.board.rotate_L(self.fill)
         elif e.keysym == 'space':
             self.next_game()
@@ -115,6 +134,8 @@ class Visualizer(object):
         pivot = self.board.unit.pivot
         self.gui.canvas.itemconfig(self.cells[pivot.y][pivot.x], outline="#000000")
         self.gui.option_area.score_label.configure(text=self.board.score)
+        if self.operations:
+            self.gui.option_area.binary_box.insert(Tk.END, self.operations[-1])
 
 
     def bind(self):
