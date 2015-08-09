@@ -1,3 +1,5 @@
+package icfpc2015;
+
 import java.io.FileInputStream;
 import java.util.*;
 
@@ -49,8 +51,7 @@ class Main {
                 final Unit[] unitSeq = new Unit[sourceLength];
                 for (int i = 0; i < sourceLength; i++)
                     unitSeq[i] = initial.appear(units[prng.nextInt() % units.length]);
-                final String solution = dfs(new Board(initial), unitSeq[0], unitSeq, 1, new HashSet<>())
-                        .reverse().toString();
+                final String solution = dfs(new Board(initial), unitSeq[0], unitSeq, 1, new HashSet<>());
                 solutions.add(String.format("{\"seed\": %d, \"solution\": \"%s\", \"problemId\": %d}",
                         seed, solution, id));
 //                System.err.println(solution);
@@ -81,7 +82,12 @@ class Main {
     }
 
 
-    static StringBuilder dfs(Board b, Unit u, Unit[] unitSeq, int idx, HashSet<Unit> visited) {
+    static String dfs(Board b, Unit u, Unit[] unitSeq, int idx, HashSet<Unit> visited) {
+
+//        System.out.println("depth = " + idx);
+//        System.out.println(u);
+//        b.printWithAUnit(u);
+
         visited.add(u);
         for (Command c : Command.values()) {
             final Unit n = b.doCommand(c, u);
@@ -91,30 +97,30 @@ class Main {
                 if (idx >= unitSeq.length) {
 //                    System.out.println("depth (a) = " + idx);
 //                    b.printWithAUnit(u);
-                    return new StringBuilder().append(c.c);
+                    return "" + c.c;
                 }
-                final Board newBoard = new Board(b).lock(u);
+                final Board newBoard = new Board(b).lock(u).remove();
                 if (newBoard.isLocked(unitSeq[idx])) {
 //                    System.out.println("depth (b) = " + idx);
 //                    b.printWithAUnit(u);
-                    return new StringBuilder().append(c.c);
+                    return "" + c.c;
                 }
-                final StringBuilder sb = dfs(newBoard, unitSeq[idx], unitSeq, idx + 1, new HashSet<>());
-                if (sb != null) {
+                final String s = dfs(newBoard, unitSeq[idx], unitSeq, idx + 1, new HashSet<>());
+                if (!s.isEmpty()) {
 //                    System.out.println("fixed");
 //                    newBoard.printWithAUnit(unitSeq[idx]);
 
 //                    System.out.println("depth (c) = " + idx);
 //                    b.printWithAUnit(u);
-                    return sb.append(c.c);
+                    return c.c + s;
                 }
                 continue;
             }
-            final StringBuilder sb = dfs(b, n, unitSeq, idx, visited);
-            if (sb != null) {
+            final String s = dfs(b, n, unitSeq, idx, visited);
+            if (!s.isEmpty()) {
 //                System.out.println("depth (d) = " + idx);
 //                b.printWithAUnit(u);
-                return sb.append(c.c);
+                return c.c + s;
             }
         }
         return null;
@@ -122,7 +128,7 @@ class Main {
 
 
     static enum Command {
-        MoveSW('4'), MoveSE('5'), MoveW('3'), MoveE('2'), TurnCounterClockwise('x'), TurnClockwise('1'),;
+        MoveSW('4'), MoveSE('5'), MoveW('3'), MoveE('2'), TurnCounterClockwise('x'), TurnClockwise('1'), ;
 
         final char c;
 
@@ -234,31 +240,28 @@ class Main {
         public Board lock(Unit u) {
             for (final Cell c : u.members)
                 map[c.x + h / 2][c.y] = true;
+            return this;
+        }
 
-//            System.out.println("before");
-//            print();
 
+        public Board remove() {
             // remove
-            for(int i = h - 1, d = 0; i >= 0; i--) {
+            for (int i = h - 1, d = 0; i >= 0; i--) {
                 boolean check = true;
-                for(int j = 0; j < w; j++)
+                for (int j = 0; j < w; j++)
                     check &= map[j - i / 2 + h / 2][i];
-                if(check) {
+                if (check) {
                     d++;
-                    for(int j = 0; j < w; j++)
+                    for (int j = 0; j < w; j++)
                         map[j - i / 2 + h / 2][i] = false;
                 } else {
-                    for(int j = 0; j < w; j++) {
-                        map[j - (i + d) / 2 + h / 2][i + d] = map[j - i / 2 + h / 2][i];
-                        map[j - i / 2 + h / 2][i] = false;
-                    }
+                    for (int j = 0; j < w; j++)
+                        if (d > 0) {
+                            map[j - (i + d) / 2 + h / 2][i + d] = map[j - i / 2 + h / 2][i];
+                            map[j - i / 2 + h / 2][i] = false;
+                        }
                 }
             }
-
-
-//            System.out.println("after");
-//            print();
-
             return this;
         }
 
@@ -310,6 +313,15 @@ class Main {
             this.members = members;
             this.pivot = pivot;
         }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("Unit{");
+            sb.append("members=").append(Arrays.toString(members));
+            sb.append(", pivot=").append(pivot);
+            sb.append('}');
+            return sb.toString();
+        }
     }
 
     static class Cell {
@@ -356,6 +368,15 @@ class Main {
             final int y1 = (int) (Math.round(ey1 / kSqrt3));
             final int x1 = (int) (Math.round((ex1 - y1) / 2.0));
             return new Cell(x1 + pivot.x, y1 + pivot.y);
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("Cell{");
+            sb.append("x=").append(x);
+            sb.append(", y=").append(y);
+            sb.append('}');
+            return sb.toString();
         }
     }
 
