@@ -10,6 +10,9 @@ from tetris import *
 from model import Input, CellState, Board
 from gui import MainFrame
 
+BasePath = os.path.dirname(os.path.abspath(__file__))
+
+
 Color = {
     CellState.Empty: "#e7e3e0",
     CellState.Fill: "#FFE677",
@@ -19,11 +22,24 @@ Color = {
 
 BgColor = "#57B196"
 
+
+class GameSet():
+    def __init__(self, board_id, seed, operations):
+        self.board_id = board_id
+        self.seed = seed
+        self.operations = operations
+
+    def __repr__(self):
+        return "Board: {} Seed: {}\nOperations: {}".format(self.board_id, self.seed, self.operations)
+
+
 class Visualizer(object):
-    def __init__(self):
+    def __init__(self, game_sets):
         """
         :type input:Input
         """
+        self.game_sets = game_sets
+        self.game_index = -1
         self.edge = None
         self.gui = None
         self.binary = None
@@ -31,24 +47,31 @@ class Visualizer(object):
         self.input = None
         self.board = None
         self.cells = None
-        # self.boards = boards
 
     def keyup(self, e):
+        """
+        Key setting.
+        """
         if e.keysym == Key.W.value:
             self.board.move_unit(lambda c: -1, 0, self.fill)
-        if e.keysym == Key.E.value:
+        elif e.keysym == Key.E.value:
             self.board.move_unit(lambda c: 1, 0, self.fill)
-        if e.keysym == Key.SW.value:
+        elif e.keysym == Key.SW.value:
             self.board.move_unit(lambda c: -1 if c.y % 2 == 0 else 0,
                                  1, self.fill)
-        if e.keysym == Key.SE.value:
+        elif e.keysym == Key.SE.value:
             self.board.move_unit(lambda c: 0 if c.y % 2 == 0 else 1,
                                  1, self.fill)
 
+        elif e.keysym == 'space':
+            self.next_game()
+
+        if e.keysym == 'Escape':
+            self.gui.destroy()
 
     def initialize_cells(self):
         """
-        :type canvas:Tk.Canvas
+        Initialize all cells. This method should be called when starting new game.
         """
         self.gui.canvas.delete("all")
         self.cells = [["" for _ in xrange(self.input.width)] for _ in xrange(self.input.height)]
@@ -66,7 +89,7 @@ class Visualizer(object):
 
     def fill(self):
         """
-        :type canvas:Tk.Canvas
+        Redraw cells.
         """
         for y in xrange(self.input.height):
             for x in xrange(self.input.width):
@@ -78,32 +101,37 @@ class Visualizer(object):
 
 
     def bind(self):
-        """
-        :type canvas:Tk.Canvas
-        """
         self.gui.canvas.bind("<KeyRelease>", self.keyup)
 
-    def game(self, board_id, seed):
-        print "Game start!"
-        with open('../problems/problem_{}.json'.format(board_id), 'r') as f:
+    def next_game(self):
+        """
+        Finish current game and start next game.
+        """
+        self.game_index += 1
+        if self.game_index >= len(game_sets):
+            print "Your game is finished."
+            return
+        game = self.game_sets[self.game_index]
+        print game
+
+        # Import game file
+        with open(os.path.join(BasePath, '../problems/problem_{}.json'.format(game.board_id)), 'r') as f:
             self.input = Input(json.load(f))
 
-        self.gui.canvas.create_rectangle(0,0,10,10)
-
-        self.board = Board(self.input)
+        self.board = Board(self.input, game.seed)
         edge = min(CanvasWidth / self.input.width,
                    FrameHeight / self.input.height) - EDGE_MARGIN
+
         self.edge = edge - (edge % 2)
         self.initialize_cells()
         self.gui.update()
         self.fill()
         self.gui.mainloop()
 
-
     def visualize(self):
         self.gui = MainFrame()
         self.bind()
-        self.game(0, 0)
+        self.next_game()
         self.gui.mainloop()
 
 
@@ -114,11 +142,12 @@ if __name__ == '__main__':
     parser.add_argument('--seed', dest='seed', default=0, type=int, help='Seed index.')
 
     args = parser.parse_args()
-    visualizer = Visualizer()
-    visualizer.visualize()
+    game_sets = []
 
     if args.is_std:
         print "stdinput"
     else:
-        visualizer.game(args.board_id, args.seed)
+        game_sets.append(GameSet(args.board_id, args.seed, []))
 
+    visualizer = Visualizer(game_sets)
+    visualizer.visualize()

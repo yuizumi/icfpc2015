@@ -5,7 +5,7 @@ from model import Input, CellState, Unit
 
 
 class Board(object):
-    def __init__(self, input):
+    def __init__(self, input, seed):
         """
         :type self.unit:Unit
         """
@@ -18,7 +18,7 @@ class Board(object):
         self.units = input.units
         self.sourceSeeds = input.sourceSeeds
         self.sourceLength = input.sourceLength
-        self.rands = self.get_rands(0)
+        self.rands = self.get_rands(seed)
         self.unit = copy.deepcopy(self.units[self.rands.next()])
         self.unit.centering(self.width)
         self.update_states()
