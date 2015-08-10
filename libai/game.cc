@@ -92,6 +92,17 @@ void GameState::Invoke(char command) {
     commands_.push_back(command);
 }
 
+vector<const UnitSpec*> GameState::GetFutureUnits() const {
+    vector<const UnitSpec*> units;
+    int seed = seed_;
+    for (int i = 0; i < rest_; i++) {
+        int value = (seed >> 16) & 0x7FFF;
+        seed = seed * 1103515245 + 12345;
+        units.emplace_back(&units_[value % units_.size()]);
+    }
+    return units;
+}
+
 void GameState::UpdateUnit() {
     if (--rest_ == 0) {
         unit_.reset();
