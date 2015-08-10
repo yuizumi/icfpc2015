@@ -34,6 +34,8 @@ public:
         Invoke(CommandToChar(command));
     }
 
+    std::vector<const UnitSpec*> GetFutureUnits() const;
+
     int move_score() const {
         return move_score_;
     }
