@@ -133,7 +133,7 @@ doc/
 .AppleDouble
 .LSOverride
 Icon
-
+*.xcodeproj/*
 
 # Thumbnails
 ._*
