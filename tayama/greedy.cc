@@ -33,26 +33,31 @@ bool has(const GameState &state, int x, int y) {
 }
 
 int Score(const GameState &state) {
-  int count = 0, score = 0;
-  for (int y = 0; y < state.board().height(); ++y) {
-    for (int x = 0; x < state.board().width(); ++x) {
-      if (has(state, x, y)) {
-        ++count;
-        int penalty = state.board().height() - y;
-        score -= penalty * penalty;
-      }
-    }
-  }
-  return count == 0 ? 0 : (score << 16) / count;
+//   int count = 0, score = 0;
+//   for (int y = 0; y < state.board().height(); ++y) {
+//     for (int x = 0; x < state.board().width(); ++x) {
+//       if (has(state, x, y)) {
+//         ++count;
+//         int penalty = state.board().height() - y;
+//         score -= penalty * penalty;
+//       }
+//     }
+//   }  
+//  return count == 0 ? 0 : (score << 16) / count;
+  return 0;
 }
 
 void Solve(GameState *state) {
   vector<string> power_phrases = {
-    "ia! ia!",
     "ei!",
+    "ia! ia!",
     "yuggoth",
+    "Planet 10",
+    "Tsathoggua",
+    "Necronomicon",
+    "cthulhu fhtagn!",
     "ph'nglui mglw'nafh cthulhu r'lyeh wgah'nagl fhtagn.",
-    "cthulhu fhtagn!"
+    "In his house at R'lyeh dead Cthulhu waits dreaming."
   };
 
   vector<string> commands = {
