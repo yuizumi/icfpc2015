@@ -67,6 +67,21 @@ int Evaluate(const GameState& state) {
 
 void Solve(GameState* state, const vector<string> &power_phrases) {
     int width = state->board().width();
+
+    bool is_ok = true;
+    for (const string& phrase : power_phrases) {
+        unique_ptr<GameState> ei(state->Clone());
+        for (char command : phrase) {
+            if (ei->IsValid(command) && ei->CanMove(command)) {
+                ei->Invoke(command);
+            } else {
+                is_ok = false;
+                break;
+            }
+        }
+        if (is_ok) state->Swap(ei.get());
+    }
+
     while (!state->gameover()) {
         debug::Print(*state);
         unique_ptr<GameState> best_state(state->Clone());
