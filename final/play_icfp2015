@@ -1,0 +1,77 @@
+#!/bin/bash
+
+declare -ar BINARY_LIST=(./placer_ai)
+declare -a phrases
+
+##------------------------
+##  Parse options.
+
+while getopts f:t:m:c:p: opt ; do
+    case "${opt}" in
+        f)
+            jsonfile="${OPTARG}"
+            ;;
+        t)
+            timeout="${OPTARG}"
+            ;;
+        m)
+            memlimit="${OPTARG}"
+            ;;
+        c)
+            numcores="${OPTARG}"
+            ;;
+        p)
+            phrases+=("${OPTARG}")
+            ;;
+        *)
+            echo "Unknown option: -${opt}." 1>&2
+            exit 1
+            ;;
+    esac
+done
+
+
+##------------------------
+##  Create tempdir.
+
+tempdir=$(mktemp -d /tmp/icfpc.team79.XXXXXX)
+trap "rm -fr ${tempdir}" EXIT
+
+
+##------------------------
+##  Run the process.
+
+declare -a procids outfiles
+
+python json2cp.py < "${jsonfile}" > "${tempdir}/input"
+
+for binary in "${BINARY_LIST[@]}" ; do
+    outfile="${tempdir}/${binary##*/}.out"
+    outfiles+=("${outfile}")
+    "${binary}" "${phrases[@]}" < "${tempdir}/input" > "${outfile}" &
+    procids+=($!)
+done
+
+for procid in "${procids[@]}" ; do
+    ( sleep $((timeout - 15)) ; kill "${procid}" 2>/dev/null || : ) &
+done
+
+wait "${procids[@]}"
+
+
+##------------------------
+##  Make the output.
+
+best_outfile=''
+best_score=0
+for outfile in "${outfiles[@]}" ; do
+    score=$( echo 1 )
+    if (( best_score < score )) ; then
+        best_outfile="${outfile}"
+        best_score="${score}"
+    fi
+done
+
+if [[ -s "${best_outfile}" ]] ; then
+    python out2json.py < "${best_outfile}"
+fi
