@@ -34,6 +34,10 @@ public:
         Invoke(CommandToChar(command));
     }
 
+    int move_score() const {
+        return move_score_;
+    }
+
     const Board& board() const {
         return *board_;
     }
@@ -68,6 +72,8 @@ private:
     std::string commands_;
     std::unique_ptr<Unit> unit_;
     std::unordered_set<uint32_t> banned_;
+    int move_score_;
+    int lines_old_;
 
     DISALLOW_COPY_AND_ASSIGN(GameState);
 };

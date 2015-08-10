@@ -12,7 +12,7 @@ std::unique_ptr<Board> Board::Clone() const {
     return std::unique_ptr<Board>(new Board(state_));
 }
 
-void Board::Lock(const Unit& unit) {
+int Board::Lock(const Unit& unit) {
     for (const Cell& cell : unit.members()) {
         set(cell, true);
     }
@@ -28,7 +28,8 @@ void Board::Lock(const Unit& unit) {
             copy(state_[y1].begin(), state_[y1].end(), state_[y0].begin());
         }
     }
-    for (y1--; y1 >= 0; y1--) {
-        fill(state_[y1].begin(), state_[y1].end(), 0);
+    for (int y = y1 - 1; y >= 0; y--) {
+        fill(state_[y].begin(), state_[y].end(), 0);
     }
+    return y1;
 }

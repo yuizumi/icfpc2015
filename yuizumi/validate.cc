@@ -26,10 +26,11 @@ int main() {
 
         assert(spec.id == out_id);
 
+        cout << "#" << i << " (Seed: " << out_seed << "): ";
         GameState state(spec.units, spec.board->Clone(), out_seed,
                         spec.length);
         for (size_t i = 0; i < out_seq.length(); i++) {
-            Command command = static_cast<Command>(out_seq[i] - '0');
+            char command = tolower(out_seq[i]);
             if (!state.IsValid(command)) {
                 cout << "Invalid at " << i << "." << endl;
                 return 1;
@@ -37,8 +38,8 @@ int main() {
             state.Invoke(command);
             debug::Print(state);
         }
+        cout << "Valid, Score = " << state.move_score() << "." << endl;
     }
-    cout << "Valid." << endl;
 
     return 0;
 }

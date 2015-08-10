@@ -13,7 +13,7 @@ public:
     Board(int w, int h);
 
     std::unique_ptr<Board> Clone() const;
-    void Lock(const Unit& unit);
+    int Lock(const Unit& unit);
 
     bool get(const Cell& cell) const {
         return get(cell.x, cell.y);
