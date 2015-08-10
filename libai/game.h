@@ -80,6 +80,6 @@ private:
     DISALLOW_COPY_AND_ASSIGN(GameState);
 };
 
-void Solve(GameState* state);  // Entry point for AI.
+void Solve(GameState* state, const std::vector<std::string> &power_phrases);  // Entry point for AI.
 
 #endif  // GAME_H_

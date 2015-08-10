@@ -1,7 +1,8 @@
 #!/bin/bash
 
-declare -ar BINARY_LIST=(./placer_ai)
+declare -ar BINARY_LIST=(./placer_ai ./greedy)
 declare -a phrases
+
 
 ##------------------------
 ##  Parse options.
@@ -64,7 +65,7 @@ wait "${procids[@]}"
 
 for outfile in "${outfiles[@]}" ; do
     checked="${outfile}.checked"
-    cat "${tempdir}/input" "${outfile}" | ./calc_score > "${checked}"
+    cat "${tempdir}/input" "${outfile}" | ./calc_score "${phrases[@]}" > "${checked}"
     score=$(head -1 "${checked}" | cut -d : -f 2)
     if (( best_score < score )) ; then
         best_outfile="${checked}"
