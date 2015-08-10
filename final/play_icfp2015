@@ -62,16 +62,16 @@ wait "${procids[@]}"
 ##------------------------
 ##  Make the output.
 
-best_outfile=''
-best_score=0
 for outfile in "${outfiles[@]}" ; do
-    score=$( echo 1 )
+    checked="${outfile}.checked"
+    cat "${tempdir}/input" "${outfile}" | ./calc_score > "${checked}"
+    score=$(head -1 "${checked}" | cut -d : -f 2)
     if (( best_score < score )) ; then
-        best_outfile="${outfile}"
+        best_outfile="${checked}"
         best_score="${score}"
     fi
 done
 
 if [[ -s "${best_outfile}" ]] ; then
-    python out2json.py < "${best_outfile}"
+    tail -n +2 "${best_outfile}" | python out2json.py
 fi
