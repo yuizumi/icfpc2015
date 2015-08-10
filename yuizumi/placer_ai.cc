@@ -26,11 +26,33 @@ void Drop(GameState* state, int x) {
             command = Choose(*state, kMoveSW, kMoveSE, kMoveW);
         } else {
             command = Choose(*state, kMoveSE, kMoveSW, kMoveE);
+            if (p.x == x && command == kMoveE)
+                break;
         }
         if (command == kNone)
             break;
         state->Invoke(command);
     }
+}
+
+int Evaluate(const GameState& state) {
+    const Board& board = state.board();
+    int score = 0;
+    int width = board.width();
+    for (int y = 1; y < board.height(); y++) {
+        for (int x = 0; x < width; x++) {
+            if (board.get(x, y))
+                continue;
+            if (board.get(x, y - 1)) {
+                --score;
+            }
+            int xx = (y % 2 == 0) ? x - 1 : x + 1;
+            if (board.get(xx, y - 1)) {
+                --score;
+            }
+        }
+    }
+    return score;
 }
 }  // namespace
 
@@ -39,13 +61,19 @@ void Solve(GameState* state) {
     while (!state->gameover()) {
         debug::Print(*state);
         unique_ptr<GameState> best_state(state->Clone());
+        int best_score = INT_MIN;
         for (int x = 0; x < width; x++) {
             unique_ptr<GameState> new_state(state->Clone());
             Drop(new_state.get(), x);
-            if (best_state->unit().pivot().y < new_state->unit().pivot().y)
+            Cell pivot = new_state->unit().pivot();
+            new_state->Invoke(kMoveSW);
+            int score = Evaluate(*new_state) + pivot.y * 4;
+            cerr << x << " " << score << endl;
+            if (best_score < score) {
+                best_score = score;
                 best_state.reset(new_state.release());
+            }
         }
-        best_state->Invoke(kMoveSW);
         state->Swap(best_state.get());
     }
 }
