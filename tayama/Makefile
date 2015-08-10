@@ -5,7 +5,7 @@ TARGETS=greedy translate validate
 LIBAI_DIR=../libai
 
 CXX=g++
-CXXFLAGS=-O3 -Wall -std=c++11 -stdlib=libc++ -I$(LIBAI_DIR)
+CXXFLAGS=-g -Wall -std=c++11 -stdlib=libc++ -I$(LIBAI_DIR)
 
 all: $(TARGETS)
 
