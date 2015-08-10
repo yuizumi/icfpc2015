@@ -13,9 +13,9 @@
 using namespace std;
 
 bool CastPhrase(const string &phrase, GameState *state) {
+  cerr << "Casting " << phrase << endl;
   for (auto c : phrase) {
-    bool can_move = state->IsValid(c);
-    if (can_move) {
+    if (state->IsValid(c)) {
       state->Invoke(c);
     } else {
       return false;
@@ -61,12 +61,12 @@ void Solve(GameState *state) {
   };
 
   vector<string> commands = {
-    "a",
-    "l",
-    "d",
-    "k",
-    "p",
-    "b"
+     "a",
+     "l",
+     "d",
+     "k",
+     "p",
+     "b"
   };
 
   vector<string> phrases(power_phrases.begin(), power_phrases.end());
@@ -86,7 +86,7 @@ void Solve(GameState *state) {
       for (int iteration = 0; iteration < phrases.size(); ++iteration) {
         const string &phrase = phrases[iteration];
         if (CastPhrase(phrase, cloned.get())){
-          phraseBonus = (phrase.length() - 1) * 2 * 0;
+          phraseBonus = (phrase.length() - 1) * 2 * 5;
         }
       }
       int newScore = Score(*cloned) + phraseBonus;
