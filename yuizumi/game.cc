@@ -16,7 +16,8 @@ bool HasConflicts(const Unit& unit, const Board& board) {
 GameState::GameState(const vector<UnitSpec>& units,
                      unique_ptr<Board> board,
                      uint32_t seed, int length)
-    : units_(units), board_(board.release()), seed_(seed), rest_(length) {
+    : units_(units), board_(board.release()), seed_(seed), rest_(length),
+      move_score_(0), lines_old_(0) {
     UpdateUnit();
 }
 
@@ -28,7 +29,9 @@ GameState::GameState(const GameState* state)
       gameover_(state->gameover_),
       commands_(state->commands_),
       unit_(state->unit_->Clone(*board_)),
-      banned_(state->banned_) {
+      banned_(state->banned_),
+      move_score_(state->move_score_),
+      lines_old_(state->lines_old_) {
 }
 
 unique_ptr<GameState> GameState::Clone() const {
@@ -43,6 +46,9 @@ void GameState::Swap(GameState* other) {
     swap(gameover_, other->gameover_);
     swap(commands_, other->commands_);
     swap(unit_, other->unit_);
+    swap(banned_, other->banned_);
+    swap(move_score_, other->move_score_);
+    swap(lines_old_, other->lines_old_);
 }
 
 bool GameState::CanMove(Command command) const {
@@ -50,6 +56,9 @@ bool GameState::CanMove(Command command) const {
 }
 
 bool GameState::IsValid(Command command) const {
+    if (command == kNone) {
+        return true;
+    }
     if (gameover_) {
         return false;
     } else {
@@ -63,12 +72,21 @@ void GameState::Invoke(char command) {
     assert(!gameover_);
 
     Command command_enum = CharToCommand(command);
+    if (command_enum == kNone) {
+        return;
+    }
     if (unit_->CanInvoke(command_enum)) {
         unit_->Invoke(command_enum);
         const auto result = banned_.insert(unit_->Hash());
         assert(result.second);
     } else {
-        board_->Lock(*unit_);
+        int lines = board_->Lock(*unit_);
+        int points = unit_->members().size() + 100 * (1 + lines) * lines / 2;
+        if (lines_old_ > 0) {
+            points += (lines_old_ - 1) * points / 10;
+        }
+        move_score_ += points;
+        lines_old_ = lines;
         UpdateUnit();
     }
     commands_.push_back(command);

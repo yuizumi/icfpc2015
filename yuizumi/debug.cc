@@ -62,6 +62,7 @@ void Print(const GameState& state) {
         cerr << " (game over)";
     }
     cerr << endl;
+    cerr << "Score: " << state.move_score() << endl;
     if (state.rest() > 0) {
         PrintBoard(state.board(), state.unit());
     }
