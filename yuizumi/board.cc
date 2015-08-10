@@ -25,7 +25,7 @@ int Board::Lock(const Unit& unit) {
         }
         --y1;
         if (y0 != y1) {
-            copy(state_[y1].begin(), state_[y1].end(), state_[y0].begin());
+            copy(state_[y0].begin(), state_[y0].end(), state_[y1].begin());
         }
     }
     for (int y = y1 - 1; y >= 0; y--) {
