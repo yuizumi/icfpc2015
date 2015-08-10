@@ -4,18 +4,11 @@ import java.util.*;
 class Greedy {
     private static final boolean DEBUG = false;
     private static final int RUNNUM = 8;
+    private static final boolean YIZUMI_OUTPUT = true;
 
     public static void main(String... args) throws Exception {
-        {
-            boolean f = false;
-            for (final String s : args)
-                if (s.equals("-f"))
-                    f = true;
-                else if (f) {
-                    System.setIn(new FileInputStream(s));
-                    f = false;
-                }
-        }
+        if(args.length > 0)
+            phrases = args;
 
         List<String> solutions = new ArrayList<>();
 
@@ -56,27 +49,30 @@ class Greedy {
                     unitSeq[i] = initial.appear(units[prng.nextInt() % units.length]);
                 final String solution = dfs(new Board(initial), unitSeq[0], unitSeq, 1, new HashSet<>(),
                         new boolean[phrases.length], -1, 0);
-                solutions.add(String.format("{\"seed\": %d, \"solution\": \"%s\", \"tag\": \"java%d\", \"problemId\": %d}",
+                if (YIZUMI_OUTPUT)
+                    solutions.add(id + " " + seed + "\n" + solution);
+                else
+                    solutions.add(String.format("{\"seed\": %d, \"solution\": \"%s\", \"tag\": \"java%d\", \"problemId\": %d}",
                         seed, solution, RUNNUM, id));
-                // for yizumi interface
-//                {
-//                    final StringBuilder sb = new StringBuilder();
-//                    for(final char c : solution.toCharArray())
-//                        sb.append(Decoder.decode(c).number);
-//                    solutions.add(sb.toString());
-//                }
                 if (DEBUG)
                     System.out.println(solution);
             }
         }
 
-        final StringBuilder sb = new StringBuilder();
-        for (final String s : solutions) {
-            if (sb.length() > 0)
-                sb.append(',');
-            sb.append(s);
+        if (YIZUMI_OUTPUT) {
+            final StringBuilder sb = new StringBuilder().append(solutions.size());
+            for (final String s : solutions)
+                sb.append(s).append('\n');
+            System.out.println(sb.toString());
+        } else {
+            final StringBuilder sb = new StringBuilder();
+            for (final String s : solutions) {
+                if (sb.length() > 0)
+                    sb.append(',');
+                sb.append(s);
+            }
+            System.out.println("[" + sb + "]");
         }
-        System.out.println("[" + sb + "]");
 
     }
 

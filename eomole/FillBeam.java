@@ -7,16 +7,8 @@ class FillBeam {
     private static final boolean YIZUMI_OUTPUT = false;
 
     public static void main(String... args) throws Exception {
-        {
-            boolean f = false;
-            for (final String s : args)
-                if (s.equals("-f"))
-                    f = true;
-                else if (f) {
-                    System.setIn(new FileInputStream(s));
-                    f = false;
-                }
-        }
+        if(args.length > 0)
+            phrases = args;
 
         List<String> solutions = new ArrayList<>();
 

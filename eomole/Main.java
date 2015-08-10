@@ -8,16 +8,8 @@ class Main {
     private static final int BEAM_BOUND = 20;
 
     public static void main(String... args) throws Exception {
-        {
-            boolean f = false;
-            for (final String s : args)
-                if (s.equals("-f"))
-                    f = true;
-                else if (f) {
-                    System.setIn(new FileInputStream(s));
-                    f = false;
-                }
-        }
+        if(args.length > 0)
+            phrases = args;
 
         List<String> solutions = new ArrayList<>();
 
