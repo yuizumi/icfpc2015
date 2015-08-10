@@ -56,6 +56,9 @@ bool GameState::CanMove(Command command) const {
 }
 
 bool GameState::IsValid(Command command) const {
+    if (command == kNone) {
+        return true;
+    }
     if (gameover_) {
         return false;
     } else {
@@ -69,6 +72,9 @@ void GameState::Invoke(char command) {
     assert(!gameover_);
 
     Command command_enum = CharToCommand(command);
+    if (command_enum == kNone) {
+        return;
+    }
     if (unit_->CanInvoke(command_enum)) {
         unit_->Invoke(command_enum);
         const auto result = banned_.insert(unit_->Hash());
