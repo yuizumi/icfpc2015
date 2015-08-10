@@ -1,18 +1,18 @@
 SRCS=$(wildcard *.cc)
 HDRS=$(wildcard *.h)
 
-TARGETS=fake_ai translate validate
+TARGETS=placer_ai translate validate
 LIBAI_DIR=../libai
 
 CXX=g++
-CXXFLAGS=-O3 -Wall -std=c++11 -stdlib=libc++ -I$(LIBAI_DIR)
+CXXFLAGS=-O3 -Wall -std=c++11 -stdlib=libc++ -I$(LIBAI_DIR) $(NDEBUG)
 
 all: $(TARGETS)
 
 clean:
 	rm -f *.o $(TARGETS)
 
-fake_ai: fake_ai.o $(LIBAI_DIR)/ai_main.o $(LIBAI_DIR)/libai.a
+placer_ai: placer_ai.o $(LIBAI_DIR)/ai_main.o $(LIBAI_DIR)/libai.a
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 translate: translate.o $(LIBAI_DIR)/libai.a

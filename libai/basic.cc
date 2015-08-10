@@ -25,13 +25,13 @@ Command CharToCommand(char c) {
 
 char CommandToChar(Command c) {
     const map<Command, char> cmd2chr = {
-        {kNone, '\t'},
-        {kMoveE, 'b'},
-        {kMoveW, 'p'},
-        {kMoveSE, 'l'},
-        {kMoveSW, 'a'},
-        {kRotateRight, 'd'},
-        {kRotateLeft, 'k'},
+        {kNone, '\r'},
+        {kMoveE, '2'},
+        {kMoveW, '3'},
+        {kMoveSE, '5'},
+        {kMoveSW, '4'},
+        {kRotateRight, '1'},
+        {kRotateLeft, 'x'},
     };
     return cmd2chr.find(c)->second;
 }
