@@ -32,18 +32,17 @@ bool has(const GameState &state, int x, int y) {
 }
 
 int Score(const GameState &state) {
-//   int count = 0, score = 0;
-//   for (int y = 0; y < state.board().height(); ++y) {
-//     for (int x = 0; x < state.board().width(); ++x) {
-//       if (has(state, x, y)) {
-//         ++count;
-//         int penalty = state.board().height() - y;
-//         score -= penalty * penalty;
-//       }
-//     }
-//   }  
-//  return count == 0 ? 0 : (score << 16) / count;
-  return 0;
+   int count = 0, score = 0;
+   for (int y = 0; y < state.board().height(); ++y) {
+     for (int x = 0; x < state.board().width(); ++x) {
+       if (has(state, x, y)) {
+         ++count;
+       int penalty = state.board().height() - y;
+         score -= penalty * penalty;
+       }
+     }
+   }  
+  return count == 0 ? 0 : (score << 16) / count;
 }
 
 void Solve(GameState *state) {
@@ -85,7 +84,7 @@ void Solve(GameState *state) {
       for (int iteration = 0; iteration < phrases.size(); ++iteration) {
         const string &phrase = phrases[iteration];
         if (CastPhrase(phrase, cloned.get())){
-          phraseBonus = (phrase.length() - 1) * 2 * 5;
+          phraseBonus = (phrase.length() - 1) * 2 * 0;
           break;
         }
       }
