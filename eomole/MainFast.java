@@ -1,11 +1,11 @@
 import java.io.FileInputStream;
 import java.util.*;
 
-class Main {
+class MainFast {
     private static final boolean DEBUG = false;
     private static final int RUNNUM = 10;
     private static final boolean YIZUMI_OUTPUT = true;
-    private static final int BEAM_BOUND = 20;
+    private static final int BEAM_BOUND = 10;
 
     public static void main(String... args) throws Exception {
         {
