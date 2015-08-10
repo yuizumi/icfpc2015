@@ -1,6 +1,6 @@
 #!/bin/bash
 
-declare -ar BINARY_LIST=(./placer_ai ./greedy)
+declare -ar BINARY_LIST=(./placer_ai ./greedy ./fast-java.sh ./main-java.sh)
 declare -a phrases
 
 
