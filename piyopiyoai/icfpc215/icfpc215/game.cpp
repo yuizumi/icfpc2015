@@ -52,10 +52,10 @@ Command Game::Stretch(GameState *state) {
 }
 
 Command Game::Recommend(GameState* state) {
-//    Command r = Stretch(state);
-//    if (r != kNone) {
-//        state->Invoke(r);
-//    }
+    Command r = Stretch(state);
+    if (r != kNone) {
+        state->Invoke(r);
+    }
     
     if (state->CanMove(kMoveSW) && state->IsValid(kMoveSW)) {
         return kMoveSW;
