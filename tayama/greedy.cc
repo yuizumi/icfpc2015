@@ -12,65 +12,11 @@
 
 using namespace std;
 
-std::map<char, Command> initCharToCommand() {
-  std::map<char, Command> m;
-  m['p'] = kMoveW;
-  m['\''] = kMoveW;
-  m['!'] = kMoveW;
-  m['.'] = kMoveW;
-  m['0'] = kMoveW;
-  m['3'] = kMoveW;
-    
-  m['b'] = kMoveE;
-  m['c'] = kMoveE;
-  m['e'] = kMoveE;
-  m['f'] = kMoveE;
-  m['y'] = kMoveE;
-  m['2'] = kMoveE;
-    
-  m['a'] = kMoveSW;
-  m['g'] = kMoveSW;
-  m['h'] = kMoveSW;
-  m['i'] = kMoveSW;
-  m['j'] = kMoveSW;
-  m['4'] = kMoveSW;
-    
-  m['l'] = kMoveSE;
-  m['m'] = kMoveSE;
-  m['n'] = kMoveSE;
-  m['o'] = kMoveSE;
-  m[' '] = kMoveSE;
-  m['5'] = kMoveSE;
-    
-  m['d'] = kRotateRight;
-  m['q'] = kRotateRight;
-  m['r'] = kRotateRight;
-  m['v'] = kRotateRight;
-  m['z'] = kRotateRight;
-  m['1'] = kRotateRight;
-    
-  m['k'] = kRotateLeft;
-  m['s'] = kRotateLeft;
-  m['t'] = kRotateLeft;
-  m['u'] = kRotateLeft;
-  m['w'] = kRotateLeft;
-  m['x'] = kRotateLeft;
-    
-  m['\t'] = kNone;
-  m['\n'] = kNone;
-  m['\r'] = kNone;
-
-  return m;
-};
-
-const std::map<char, Command> kCharToCommand = initCharToCommand();
-
 bool CastPhrase(const string &phrase, GameState *state) {
   for (auto c : phrase) {
-    auto command = kCharToCommand.find(c)->second;
-    bool can_move = state->IsValid(command);
+    bool can_move = state->IsValid(c);
     if (can_move) {
-      state->Invoke(command);
+      state->Invoke(c);
     } else {
       return false;
     }
@@ -78,18 +24,26 @@ bool CastPhrase(const string &phrase, GameState *state) {
   return true;
 }
 
+bool has(const GameState &state, int x, int y) {
+  if (state.board().get(x, y)) return true;
+  for (const auto &member : state.unit().members()) {
+    if (member == (Cell) { x, y }) return true;
+  }
+  return false;
+}
+
 int Score(const GameState &state) {
   int count = 0, score = 0;
   for (int y = 0; y < state.board().height(); ++y) {
     for (int x = 0; x < state.board().width(); ++x) {
-      if (state.board().get(x, y)) {
+      if (has(state, x, y)) {
         ++count;
         int penalty = state.board().height() - y;
         score -= penalty * penalty;
       }
     }
   }
-  return count == 0 ? 0 : score / count;
+  return count == 0 ? 0 : (score << 16) / count;
 }
 
 void Solve(GameState *state) {
@@ -120,16 +74,14 @@ void Solve(GameState *state) {
     }
     int currentScore = 0x80000000;
     unique_ptr<GameState> bestState = state->Clone();
-    for (int attempt = 0; attempt < 1000; ++attempt) {
-      // random_shuffle(phrases.begin(), phrases.begin() + power_phrases.size());
-      // random_shuffle(phrases.begin() + power_phrases.size(), phrases.end());
-      random_shuffle(phrases.begin(), phrases.end());
+    for (int attempt = 0; attempt < 1; ++attempt) {
+      
       unique_ptr<GameState> cloned = state->Clone();
       int phraseBonus = 0;
-      for (const auto& phrase : phrases) {
+      for (int iteration = 0; iteration < phrases.size(); ++iteration) {
+        const string &phrase = phrases[iteration];
         if (CastPhrase(phrase, cloned.get())){
-          phraseBonus = (phrase.length() - 1) * 2 * 5;
-          break;
+          phraseBonus = (phrase.length() - 1) * 2 * 0;
         }
       }
       int newScore = Score(*cloned) + phraseBonus;
@@ -142,5 +94,6 @@ void Solve(GameState *state) {
 
     bestState->Swap(state);
     debug::Print(*bestState);
+    cerr << "Evaluation: " << Score(*bestState) << endl;
   }
 }
