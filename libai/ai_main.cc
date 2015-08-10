@@ -1,19 +1,8 @@
 #include <iostream>
-#include <vector>
-
-#include "basic.h"
-#include "board.h"
 #include "game.h"
 #include "input.h"
-#include "unit.h"
 
 using namespace std;
-
-void FakeAI(GameState* state) {
-    state->Invoke(kMoveE);
-    state->Invoke(kMoveSW);
-    state->Invoke(kMoveW);
-}
 
 int main() {
     ios_base::sync_with_stdio(false);
