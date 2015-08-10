@@ -1,7 +1,7 @@
 SRCS=$(wildcard *.cc)
 HDRS=$(wildcard *.h)
 
-TARGETS=fake_ai translate validate
+TARGETS=climb_ai fake_ai translate validate
 LIBAI_DIR=../libai
 
 CXX=g++
@@ -11,6 +11,9 @@ all: $(TARGETS)
 
 clean:
 	rm -f *.o $(TARGETS)
+
+climb_ai: climb_ai.o $(LIBAI_DIR)/ai_main.o $(LIBAI_DIR)/libai.a
+	$(CXX) $(CXXFLAGS) -o $@ $^
 
 fake_ai: fake_ai.o $(LIBAI_DIR)/ai_main.o $(LIBAI_DIR)/libai.a
 	$(CXX) $(CXXFLAGS) -o $@ $^
