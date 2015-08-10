@@ -23,11 +23,8 @@ bool CastPhrase(const string &phrase, GameState *state) {
   return true;
 }
 
-bool has(const GameState &state, int x, int y) {
+inline bool has(const GameState &state, int x, int y) {
   if (state.board().get(x, y)) return true;
-  for (const auto &member : state.unit().members()) {
-    if (member == (Cell) { x, y }) return true;
-  }
   return false;
 }
 
