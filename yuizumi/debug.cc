@@ -34,7 +34,7 @@ void PrintBoard(const Board& board, const Unit& unit) {
     }
 }
 
-void PrintCommands(const vector<Command>& commands) {
+void PrintCommands(const string& commands) {
     const map<Command, string> short_names = {
         {kNone, "-"},
         {kMoveE, "E"},
@@ -44,11 +44,11 @@ void PrintCommands(const vector<Command>& commands) {
         {kRotateRight, "rotr"},
         {kRotateLeft, "rotl"},
     };
-
-    for (Command command : commands) {
-        cerr << short_names.find(command)->second << ' ';
+    for (char command : commands) {
+        cerr << short_names.find(CharToCommand(command))->second << ' ';
     }
     cerr << endl;
+    cerr << commands << endl;
 }
 
 }  // namespace
@@ -62,6 +62,7 @@ void Print(const GameState& state) {
         cerr << " (game over)";
     }
     cerr << endl;
+    cerr << "Score: " << state.move_score() << endl;
     if (state.rest() > 0) {
         PrintBoard(state.board(), state.unit());
     }

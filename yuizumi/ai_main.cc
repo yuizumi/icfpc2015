@@ -26,9 +26,8 @@ int main() {
         GameState state(spec.units, spec.board->Clone(), seed,
                         spec.length);
         Solve(&state);
-        cout << spec.id << " " << seed << endl;
-        for (Command command : state.commands()) cout << command;
-        cout << endl; cout.flush();
+        cout << spec.id << " " << seed << endl << state.commands() << endl;
+        cout.flush();
     }
 
     return 0;
