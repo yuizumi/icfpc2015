@@ -1,7 +1,12 @@
+#include <string>
+#include <vector>
+
 #include "debug.h"
 #include "game.h"
 
-void Solve(GameState* state) {
+using namespace std;
+
+void Solve(GameState* state, const vector<string> &power_phrases) {
     debug::Print(*state);
     state->Invoke(kMoveSW);
     debug::Print(*state);
