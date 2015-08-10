@@ -14,10 +14,10 @@ Command CharToCommand(char c) {
         {'i', kMoveSW}, {'j', kMoveSW}, {'4', kMoveSW},
         {'l', kMoveSE}, {'m', kMoveSE}, {'n', kMoveSE},
         {'o', kMoveSE}, {' ', kMoveSE}, {'5', kMoveSE},
-        {'d', kRotateRight}, {'q', kRotateRight}, {'r', kRotateRight},
-        {'v', kRotateRight}, {'z', kRotateRight}, {'1', kRotateRight},
-        {'k', kRotateLeft}, {'s', kRotateLeft}, {'t', kRotateLeft},
-        {'u', kRotateLeft}, {'w', kRotateLeft}, {'x', kRotateLeft},
+        {'d', kRotateLeft}, {'q', kRotateLeft}, {'r', kRotateLeft},
+        {'v', kRotateLeft}, {'z', kRotateLeft}, {'1', kRotateLeft},
+        {'k', kRotateRight}, {'s', kRotateRight}, {'t', kRotateRight},
+        {'u', kRotateRight}, {'w', kRotateRight}, {'x', kRotateRight},
         {'\t', kNone}, {'\n', kNone}, {'\r', kNone},
     };
     return chr2cmd.find(c)->second;
@@ -30,8 +30,8 @@ char CommandToChar(Command c) {
         {kMoveW, 'p'},
         {kMoveSE, 'l'},
         {kMoveSW, 'a'},
-        {kRotateRight, 'd'},
-        {kRotateLeft, 'k'},
+        {kRotateLeft, 'd'},
+        {kRotateRight, 'k'},
     };
     return cmd2chr.find(c)->second;
 }
