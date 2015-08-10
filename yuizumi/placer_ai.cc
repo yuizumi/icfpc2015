@@ -1,3 +1,6 @@
+#include <string>
+#include <vector>
+
 #include "debug.h"
 #include "game.h"
 
@@ -65,7 +68,7 @@ int Evaluate(const GameState& state) {
 }
 }  // namespace
 
-void Solve(GameState* state) {
+void Solve(GameState* state, const vector<string> &power_phrases) {
     int width = state->board().width();
     while (!state->gameover()) {
         debug::Print(*state);

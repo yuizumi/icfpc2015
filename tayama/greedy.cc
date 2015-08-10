@@ -45,19 +45,7 @@ int Score(const GameState &state) {
   return count == 0 ? 0 : (score << 16) / count;
 }
 
-void Solve(GameState *state) {
-  vector<string> power_phrases = {
-    "ei!",
-    "ia! ia!",
-    "yuggoth",
-    "Planet 10",
-    "Tsathoggua",
-    "Necronomicon",
-    "cthulhu fhtagn!",
-    "ph'nglui mglw'nafh cthulhu r'lyeh wgah'nagl fhtagn.",
-    "In his house at R'lyeh dead Cthulhu waits dreaming."
-  };
-
+void Solve(GameState *state, const vector<string> &power_phrases) {
   vector<string> commands = {
      "a",
      "l",
