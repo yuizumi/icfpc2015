@@ -3,8 +3,9 @@ import java.util.*;
 
 class Main {
     private static final boolean DEBUG = false;
-    private static final int RUNNUM = 9;
+    private static final int RUNNUM = 10;
     private static final boolean YIZUMI_OUTPUT = false;
+    private static final int BEAM_BOUND = 20;
 
     public static void main(String... args) throws Exception {
         {
@@ -23,7 +24,7 @@ class Main {
         final Scanner sc = new Scanner(System.in);
         while (sc.hasNext()) {
             final int id = sc.nextInt();
-            if (id < 0)
+            if(id < 0)
                 break;
 
             final Unit[] units = new Unit[sc.nextInt()];
@@ -50,8 +51,6 @@ class Main {
                     initial.printWithAUnit(initial.appear(unit));
             }
 
-            final int beamBound = 10;
-
             for (final int seed : sourceSeeds) {
                 final PRNG prng = new PRNG(seed);
                 final Unit[] unitSeq = new Unit[sourceLength];
@@ -69,26 +68,30 @@ class Main {
                         final Game g = tsg.pollFirst();
 
                         if (DEBUG)
-                            if (g.cunit != null && !g.b.isLocked(g.cunit))
+                            if (g.cunit != null && !g.b.isLocked(g.cunit)) {
+                                System.out.println("Num:\t" + g.uidx);
+                                System.out.println("Score:\t" + g.moveScore + ", " + g.phraseBonus);
                                 g.b.printWithAUnit(g.cunit);
+                            }
 
                         final FinalScore r = g.finish();
+
                         if (best.compareTo(r) > 0)
                             best = r;
                         final ArrayList<Game> nexts = g.generateNexts();
                         for (final Game ng : nexts) {
                             tsgs[ng.uidx].add(ng);
-                            while (tsgs[ng.uidx].size() > beamBound)
+                            while (tsgs[ng.uidx].size() > BEAM_BOUND)
                                 tsgs[ng.uidx].pollLast();
                         }
                     }
+                validate(initial, best.solution, unitSeq);
 
                 System.err.println(id + "\t" + seed + "\t" + best.score + "pt\n\t" + best.solution);
 
-                if (YIZUMI_OUTPUT) {
-                    System.out.println(id + " " + seed);
-                    System.out.println(yizumiCode(best.solution));
-                } else
+                if (YIZUMI_OUTPUT)
+                    solutions.add(id + " " + seed + "\n" + best.solution);
+                else
                     solutions.add(
                             String.format("{\"seed\": %d, \"solution\": \"%s\", \"tag\": \"java%d\", \"problemId\": %d}",
                                     seed, best.solution, RUNNUM, id));
@@ -96,13 +99,20 @@ class Main {
             }
         }
 
-        final StringBuilder sb = new StringBuilder();
-        for (final String s : solutions) {
-            if (sb.length() > 0)
-                sb.append(',');
-            sb.append(s);
+        if (YIZUMI_OUTPUT) {
+            final StringBuilder sb = new StringBuilder().append(solutions.size());
+            for (final String s : solutions)
+                sb.append(s).append('\n');
+            System.out.println(sb.toString());
+        } else {
+            final StringBuilder sb = new StringBuilder();
+            for (final String s : solutions) {
+                if (sb.length() > 0)
+                    sb.append(',');
+                sb.append(s);
+            }
+            System.out.println("[" + sb + "]");
         }
-        System.out.println("[" + sb + "]");
 
     }
 
@@ -118,6 +128,44 @@ class Main {
             "in his house at r'lyeh dead cthulhu waits dreaming.",
             "planet 10",
     };
+
+    static void validate(Board b, String commands, Unit[] units) {
+        b = new Board(b);
+        final HashSet<Unit> visited = new HashSet<>();
+        Unit u = units[0];
+        int nxt = 1;
+        boolean closed = false;
+        final char[] cs = commands.toCharArray();
+        for (int i = 0; i < cs.length; i++) {
+            if (closed)
+                throw new RuntimeException("already closed at " + i + " in\n\t" + commands);
+
+            visited.add(u);
+            final Command c = Decoder.decode(cs[i]);
+            final Unit nu = b.doCommand(c, u);
+            if (visited.contains(nu))
+                throw new RuntimeException("same position at " + i + " in\n\t" + commands);
+
+            if (b.isLocked(nu)) {
+                b.lock(u);
+                b.remove();
+                visited.clear();
+
+                if (nxt < units.length) {
+                    u = units[nxt++];
+                    if(b.isLocked(u)) {
+                        u = null;
+                        closed = true;
+                    }
+                } else {
+                    u = null;
+                    closed = true;
+                }
+            } else {
+                u = nu;
+            }
+        }
+    }
 
     static class TSG extends TreeSet<Game> {
     }
@@ -150,6 +198,15 @@ class Main {
             phraseBonus = pb;
             usedPhraseMask = mask;
             h2 = b.h / 2;
+            visited.add(cunit);
+        }
+
+        public Game copy() {
+            return new Game(b, cunit, units, uidx, moveScore, ls_old_m1, commands, new HashSet<>(visited));
+        }
+
+        public Game fork(Unit u, String cs) {
+            return new Game(b, u, units, uidx, moveScore, ls_old_m1, cs, new HashSet<>(visited));
         }
 
         final Board b;
@@ -263,6 +320,7 @@ class Main {
                     now = turned;
                 }
             }
+            b.printWithAUnit(u);
             throw null;
         }
 
@@ -293,31 +351,65 @@ class Main {
 
         }
 
-        Optional<Game> tryToEmbedPhrase(String phrase, Unit u, String commands) {
-            Game g = this;
-            final HashSet<Unit> visited = new HashSet<>(this.visited);
+        Game tryToEmbedPhrase(String phrase, String commands) {
+            Unit u = cunit;
             final StringBuilder sb = new StringBuilder(commands);
-            for (final char ch : phrase.toCharArray()) {
-                if (u == null || g.b.isLocked(u))
-                    return Optional.empty();
+            final char[] cs = phrase.toCharArray();
+            for (int i = 0; i < cs.length; i++) {
+                if (u == null || b.isLocked(u))
+                    return null;
 
-                final Command c = Decoder.decode(ch);
-                sb.append(ch);
-                final Unit nu = g.b.doCommand(c, u);
-                if (g.b.isLocked(nu)) {
-                    g = g.advanceToNewUnit(u, sb.toString());
-                    u = g.cunit;
-                    visited.clear();
+                final Command c = Decoder.decode(cs[i]);
+                sb.append(cs[i]);
+                final Unit nu = b.doCommand(c, u);
+                if (b.isLocked(nu)) {
+                    return advanceToNewUnit(u, sb.toString()).
+                            tryToEmbedPhrase(phrase.substring(i + 1), sb.toString());
                 } else {
                     if (visited.contains(nu))
-                        return Optional.empty();
+                        return null;
 
                     visited.add(u = nu);
                 }
             }
-//            System.out.println(g.commands);
+            return new Game(b, u, units, uidx, moveScore, ls_old_m1, sb.toString(), visited);
+        }
 
-            return Optional.of(new Game(g.b, u, g.units, g.uidx, g.moveScore, g.ls_old_m1, sb.toString(), visited));
+        void tryDest(Cell dest, int[][] distMap, ArrayList<Game> nexts) {
+            final ArrayDeque<Cell> path = new ArrayDeque<>();
+            for (Cell c = dest; !c.equals(cunit.pivot); c = restorePath(distMap, c))
+                path.offerFirst(c);
+
+            final ArrayList<Command> plan = new ArrayList<>();
+            final HashSet<Unit> v = new HashSet<>(visited);
+            Unit u = cunit;
+            while (!path.isEmpty())
+                u = planCommands(path.pollFirst(), u, plan, v);
+
+            final Command lock = tryToLock(u);
+            if (lock != null) {
+                plan.add(lock);
+                nexts.add(advanceToNewUnit(u, commands + encode(plan)));
+            }
+
+            Unit uu = cunit;
+            final StringBuilder sb = new StringBuilder(commands);
+            int mask = 0;
+            for (final Command c : plan) {
+                for (int i = 0; i < phrases.length; i++) {
+                    final String s = sb.toString();
+                    if (((mask | usedPhraseMask) & 1 << i) == 0) {
+                        final Game emb = fork(uu, sb.toString()).tryToEmbedPhrase(phrases[i], s);
+                        if(emb != null) {
+                            nexts.add(emb);
+                            mask |= 1 << i;
+                        }
+                    }
+                }
+                sb.append(c.c);
+                uu = b.doCommand(c, uu);
+                visited.add(uu);
+            }
         }
 
         public ArrayList<Game> generateNexts() {
@@ -329,35 +421,8 @@ class Main {
             final int[][] distMap = makeDistanceMap();
             final int max = getFurthestDistance(distMap);
 
-            for (final Cell cand : generateCandidates(distMap, max)) {
-                final ArrayDeque<Cell> path = new ArrayDeque<>();
-                for (Cell c = cand; !c.equals(cunit.pivot); c = restorePath(distMap, c))
-                    path.offerFirst(c);
-
-                final ArrayList<Command> plan = new ArrayList<>();
-                final HashSet<Unit> v = new HashSet<>(visited);
-                Unit u = cunit;
-                while (!path.isEmpty())
-                    u = planCommands(path.pollFirst(), u, plan, v);
-
-                final Command lock = tryToLock(u);
-                if (lock != null) {
-                    plan.add(lock);
-                    nexts.add(advanceToNewUnit(u, commands + encode(plan)));
-                }
-
-                Unit uu = u;
-                StringBuilder sb = new StringBuilder(commands);
-                for (final Command c : plan) {
-                    for (int i = 0; i < phrases.length; i++) {
-                        final String s = sb.toString();
-                        if ((usedPhraseMask & 1 << i) == 0)
-                            tryToEmbedPhrase(phrases[i], uu, s).ifPresent(nexts::add);
-
-                        uu = b.doCommand(c, uu);
-                    }
-                }
-            }
+            for (final Cell cand : generateCandidates(distMap, max))
+                copy().tryDest(cand, distMap, nexts);
 
             return nexts;
         }
@@ -525,6 +590,7 @@ class Main {
 
         public int remove() {
             // remove
+
             int d = 0;
             for (int i = h - 1; i >= 0; i--) {
                 boolean check = true;
@@ -542,6 +608,7 @@ class Main {
                         }
                 }
             }
+
             return d;
         }
 
@@ -710,3 +777,4 @@ class Main {
         return sb.toString();
     }
 }
+
