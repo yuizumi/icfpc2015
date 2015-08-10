@@ -1,0 +1,1 @@
+../yuizumi/translate.cc
