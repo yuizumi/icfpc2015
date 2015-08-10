@@ -77,14 +77,15 @@ void Solve(GameState *state) {
     }
     int currentScore = 0x80000000;
     unique_ptr<GameState> bestState = state->Clone();
-    for (int attempt = 0; attempt < 1; ++attempt) {
+    for (int attempt = 0; attempt < 50; ++attempt) {
       
+      random_shuffle(phrases.begin(), phrases.end());
       unique_ptr<GameState> cloned = state->Clone();
       int phraseBonus = 0;
       for (int iteration = 0; iteration < phrases.size(); ++iteration) {
         const string &phrase = phrases[iteration];
         if (CastPhrase(phrase, cloned.get())){
-          phraseBonus = (phrase.length() - 1) * 2 * 0;
+          phraseBonus = (phrase.length() - 1) * 2 * 50;
           break;
         }
       }
