@@ -78,6 +78,20 @@ bool CastPhrase(const string &phrase, GameState *state) {
   return true;
 }
 
+int Score(const GameState &state) {
+  int count = 0, score = 0;
+  for (int y = 0; y < state.board().height(); ++y) {
+    for (int x = 0; x < state.board().width(); ++x) {
+      if (state.board().get(x, y)) {
+        ++count;
+        int penalty = state.board().height() - y;
+        score -= penalty * penalty;
+      }
+    }
+  }
+  return count == 0 ? 0 : score / count;
+}
+
 void Solve(GameState *state) {
   vector<string> power_phrases = {
     "ia! ia!",
@@ -99,23 +113,34 @@ void Solve(GameState *state) {
   vector<string> phrases(power_phrases.begin(), power_phrases.end());
   phrases.insert(phrases.end(), commands.begin(), commands.end());
 
-  bool done = true;
-  while (done) {
-    done = false;
-    debug::Print(*state);
+  while (true) {
     if (state->gameover()) {
+      debug::Print(*state);
       break;
     }
-
-    random_shuffle(phrases.begin(), phrases.begin() + power_phrases.size());
-    random_shuffle(phrases.begin() + power_phrases.size(), phrases.end());
-    for (auto phrase : phrases) {
+    int currentScore = 0x80000000;
+    unique_ptr<GameState> bestState = state->Clone();
+    for (int attempt = 0; attempt < 1000; ++attempt) {
+      // random_shuffle(phrases.begin(), phrases.begin() + power_phrases.size());
+      // random_shuffle(phrases.begin() + power_phrases.size(), phrases.end());
+      random_shuffle(phrases.begin(), phrases.end());
       unique_ptr<GameState> cloned = state->Clone();
-      if (CastPhrase(phrase, cloned.get())) {
-        cloned->Swap(state);
-        done = true;
-        break;
+      int phraseBonus = 0;
+      for (const auto& phrase : phrases) {
+        if (CastPhrase(phrase, cloned.get())){
+          phraseBonus = (phrase.length() - 1) * 2 * 5;
+          break;
+        }
+      }
+      int newScore = Score(*cloned) + phraseBonus;
+      if (currentScore < newScore) {
+        currentScore = newScore;
+        bestState->Swap(cloned.get());
+      } else {
       }
     }
+
+    bestState->Swap(state);
+    debug::Print(*bestState);
   }
 }
