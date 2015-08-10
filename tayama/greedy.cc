@@ -13,7 +13,6 @@
 using namespace std;
 
 bool CastPhrase(const string &phrase, GameState *state) {
-  cerr << "Casting " << phrase << endl;
   for (auto c : phrase) {
     if (state->IsValid(c)) {
       state->Invoke(c);
@@ -87,6 +86,7 @@ void Solve(GameState *state) {
         const string &phrase = phrases[iteration];
         if (CastPhrase(phrase, cloned.get())){
           phraseBonus = (phrase.length() - 1) * 2 * 5;
+          break;
         }
       }
       int newScore = Score(*cloned) + phraseBonus;
@@ -99,6 +99,5 @@ void Solve(GameState *state) {
 
     bestState->Swap(state);
     debug::Print(*bestState);
-    cerr << "Evaluation: " << Score(*bestState) << endl;
   }
 }
