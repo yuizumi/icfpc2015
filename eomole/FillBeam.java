@@ -1,7 +1,7 @@
 import java.io.FileInputStream;
 import java.util.*;
 
-class Main {
+class FillBeam {
     private static final boolean DEBUG = false;
     private static final int RUNNUM = 9;
     private static final boolean YIZUMI_OUTPUT = false;
@@ -228,7 +228,7 @@ class Main {
             throw null;
         }
 
-        Unit planCommands(Cell next, Unit u, ArrayList<Command> plan, HashSet<Unit> visited) {
+        Unit planCommands(Cell next, Unit u, ArrayList<Command> plan) {
             // decide move operation
             Command move = null;
             for (final Command c : moveCommands) {
@@ -236,7 +236,7 @@ class Main {
                 if (nu.pivot.equals(next)) {
                     if (!b.isLocked(nu) && !visited.contains(nu)) {
                         plan.add(c);
-                        visited.add(nu);
+//                        visited.add(nu);
                         return nu;
                     }
                     move = c;
@@ -257,7 +257,7 @@ class Main {
                     if (!b.isLocked(nu) && !visited.contains(nu)) {
                         for (int j = 0; j < i; j++)
                             plan.add(c);
-                        visited.add(nu);
+//                        visited.add(nu);
                         return nu;
                     }
                     now = turned;
@@ -275,53 +275,23 @@ class Main {
             return null;
         }
 
-        String encode(ArrayList<Command> plan) {
-            final StringBuilder sb = new StringBuilder();
+        Game advanceToNewUnit(ArrayList<Command> plan, Unit u, String commands) {
+            final StringBuilder sb = new StringBuilder(commands);
             for (final Command c : plan)
                 sb.append(c.c);
-            return sb.toString();
-        }
 
-        Game advanceToNewUnit(Unit u, String commands) {
             final Board newBoard = new Board(b);
             final int ls = newBoard.lock(u).remove();
             final int point = u.members.length + 100 * ls * (ls + 1) / 2;
             final int newMoveScore = moveScore + point + ls_old_m1 * point / 10;
 
             return new Game(newBoard, uidx + 1 < units.length ? units[uidx + 1] : null, units, uidx + 1,
-                    newMoveScore, ls > 0 ? ls - 1 : 0, commands, new HashSet<>());
+                    newMoveScore, ls > 0 ? ls - 1 : 0, sb.toString(), new HashSet<>());
 
-        }
-
-        Optional<Game> tryToEmbedPhrase(String phrase, Unit u, String commands) {
-            Game g = this;
-            final HashSet<Unit> visited = new HashSet<>(this.visited);
-            final StringBuilder sb = new StringBuilder(commands);
-            for (final char ch : phrase.toCharArray()) {
-                if (u == null || g.b.isLocked(u))
-                    return Optional.empty();
-
-                final Command c = Decoder.decode(ch);
-                sb.append(ch);
-                final Unit nu = g.b.doCommand(c, u);
-                if (g.b.isLocked(nu)) {
-                    g = g.advanceToNewUnit(u, sb.toString());
-                    u = g.cunit;
-                    visited.clear();
-                } else {
-                    if (visited.contains(nu))
-                        return Optional.empty();
-
-                    visited.add(u = nu);
-                }
-            }
-//            System.out.println(g.commands);
-
-            return Optional.of(new Game(g.b, u, g.units, g.uidx, g.moveScore, g.ls_old_m1, sb.toString(), visited));
         }
 
         public ArrayList<Game> generateNexts() {
-            if (cunit == null || b.isLocked(cunit) || !b.isIn(cunit.pivot))
+            if (cunit == null || b.isLocked(cunit))
                 return new ArrayList<>();
 
             final ArrayList<Game> nexts = new ArrayList<>();
@@ -335,27 +305,14 @@ class Main {
                     path.offerFirst(c);
 
                 final ArrayList<Command> plan = new ArrayList<>();
-                final HashSet<Unit> v = new HashSet<>(visited);
                 Unit u = cunit;
                 while (!path.isEmpty())
-                    u = planCommands(path.pollFirst(), u, plan, v);
+                    u = planCommands(path.pollFirst(), u, plan);
 
                 final Command lock = tryToLock(u);
-                if (lock != null) {
+                if(lock != null) {
                     plan.add(lock);
-                    nexts.add(advanceToNewUnit(u, commands + encode(plan)));
-                }
-
-                Unit uu = u;
-                StringBuilder sb = new StringBuilder(commands);
-                for (final Command c : plan) {
-                    for (int i = 0; i < phrases.length; i++) {
-                        final String s = sb.toString();
-                        if ((usedPhraseMask & 1 << i) == 0)
-                            tryToEmbedPhrase(phrases[i], uu, s).ifPresent(nexts::add);
-
-                        uu = b.doCommand(c, uu);
-                    }
+                    nexts.add(advanceToNewUnit(plan, u, commands));
                 }
             }
 
