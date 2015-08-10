@@ -1,11 +1,29 @@
-all: greedy translate
-	./eval.sh
+SRCS=$(wildcard *.cc)
+HDRS=$(wildcard *.h)
 
-greedy: *.cc ../yuizumi/*.cc
-	g++ -g -std=c++11 -stdlib=libc++ -o greedy *.cc ../yuizumi/board.cc ../yuizumi/debug.cc ../yuizumi/game.cc ../yuizumi/unit.cc
+TARGETS=greedy translate validate
+LIBAI_DIR=../libai
 
-translate:
-	g++ -std=c++11 -stdlib=libc++ -o translate ../yuizumi/translate.cc
+CXX=g++
+CXXFLAGS=-O3 -Wall -std=c++11 -stdlib=libc++ -I$(LIBAI_DIR)
+
+all: $(TARGETS)
 
 clean:
-	rm greedy translate
+	rm -f *.o $(TARGETS)
+
+greedy: greedy.o $(LIBAI_DIR)/ai_main.o $(LIBAI_DIR)/libai.a
+	$(CXX) $(CXXFLAGS) -o $@ $^
+
+translate: translate.o $(LIBAI_DIR)/libai.a
+	$(CXX) $(CXXFLAGS) -o $@ $^
+
+validate: validate.o $(LIBAI_DIR)/libai.a
+	$(CXX) $(CXXFLAGS) -o $@ $^
+
+.depend: $(SRCS) $(HDRS)
+	rm -f ./.depend
+	$(CXX) $(CXXFLAGS) -MM $(SRCS) >> ./.depend
+-include .depend
+
+.PHONY: clean
