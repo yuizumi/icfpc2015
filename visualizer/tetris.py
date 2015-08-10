@@ -43,6 +43,7 @@ CharaToOperation = {
     "4": Key.SW,
 
     "l": Key.SE,
+    "m": Key.SE,
     "n": Key.SE,
     "o": Key.SE,
     " ": Key.SE,
